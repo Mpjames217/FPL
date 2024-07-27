@@ -1,8 +1,7 @@
-#Python script to select GW1 squad - using last year pionts totals for now
+#Python script to select GW1 squad - using maunally entered player data with estimated season pionts for now
 from pprint import pprint
 
-#pull player data from API
-#simulated version (expand to see):
+#simulated player data (expand to see):
 players = {
     'GK' : [
     {
@@ -294,12 +293,9 @@ players = {
 
 #create list of formations
 #formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
-#lets scale down problem and just select one player from each position.
+#scaled down to one formation for intial development
 formations = [[3,5,2]]
 
-#pull and combine predicted points
-
-#compute points total for each combination
 #For each formation, calculate minimum budget needed for the bench.
 squad_price = 0
 budget = 100
@@ -314,11 +310,15 @@ bench_MD = 5 - formations[0][1]
 bench_FD = 3 - formations[0][2]
 
 min_bench_budget = bench_GK * min_GK_price + bench_DF * min_DF_price + bench_MD * min_MD_price + bench_FD * min_FD_price
+
+#And budget for starting XI
 starting_XI_budget = budget - min_bench_budget
 
+#declare variables for using in nested loops below
 results = {'Points': 0, 'Starting_XI': '', 'Cost': starting_XI_budget}
 combinations_tested = 0
 
+#loop through each combination of players
 for gk in players['GK']: #for each GK
     clubs = {'Arsenal': 0, 'Crystal Palace': 0, 'Chelsea': 0, 'Everton': 0} #...
     for a in range(0,len(players['DEF']) - 2):
@@ -333,12 +333,15 @@ for gk in players['GK']: #for each GK
                                         for j in range(i + 1, len(players['FWD'])):
                                             combinations_tested += 1
 
+                                            #check if total points of XI higher than default/current toal
                                             points = gk['Points'] + players['DEF'][a]['Points'] + players['DEF'][b]['Points'] + players['DEF'][c]['Points'] + players['MID'][d]['Points'] + players['MID'][e]['Points'] + players['MID'][f]['Points'] + players['MID'][g]['Points'] + players['MID'][h]['Points'] + players['FWD'][i]['Points'] + players['FWD'][j]['Points']
                                             if points >= results['Points']:
                                                 #now check cost - if wanted to return both teams that have equal pionts and price. could have elif: append
                                                 cost = gk['Price'] + players['DEF'][a]['Price'] + players['DEF'][b]['Price'] + players['DEF'][c]['Price'] + players['MID'][d]['Price'] + players['MID'][e]['Price'] + players['MID'][f]['Price'] + players['MID'][g]['Price'] + players['MID'][h]['Price'] + players['FWD'][i]['Price'] + players['FWD'][j]['Price']
                                                 if cost <= results['Cost']:
-                                                    #check clubs played for
+                                                    #add check here for clubs played for
+
+                                                    #get player names and add all data to results{}
                                                     starting_XI = [gk['Name'], players['DEF'][a]['Name'], players['DEF'][b]['Name'], players['DEF'][c]['Name'], players['MID'][d]['Name'], players['MID'][e]['Name'], players['MID'][f]['Name'], players['MID'][g]['Name'], players['MID'][h]['Name'], players['FWD'][i]['Name'], players['FWD'][j]['Name']]
                                                     results['Starting_XI'] = starting_XI
                                                     results['Points'] = points
