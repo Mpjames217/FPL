@@ -20,7 +20,42 @@ for player in players_API:
         position = 'FWD'
     players[position].append({'name': player['web_name'], 'club': player['team'], 'cost': player['now_cost'] / 10, 'points': player['total_points']})
 
-pprint(players['FWD'])
+#get list of unique price pionts for each position
+price_points = {}
+for position in players:
+    price_points[position] = []
+    for player in players[position]:
+        if player['cost'] not in price_points[position]:
+            price_points[position].append(player['cost'])
+
+#get top 5 players for each price piont in each position
+top_players = {}
+
+#for each price point
+for position in price_points:
+    top_players[position] = {}
+    for price_point in price_points[position]:
+        top_players[position][price_point] = []
+        #for each player in position, add to top players if higher points than players already there, or less than 5 in each position
+        for player in players[position]:
+            if player['cost'] == price_point:
+                if len(top_players[position][price_point]) < 3:
+                    top_players[position][price_point].append(player)
+                #loop through players already in top players and replace if current player pionts are higher
+                else:
+                    for i in range(len(top_players[position][price_point])):
+                        if player['points'] > top_players[position][price_point][i]['points']:
+                            top_players[position][price_point][i] = player
+                            break
+
+#repopulate players[] without the price point keys
+players = {}
+for position in top_players:
+    players[position] = []
+    for price_point in top_players[position]:
+        for player in top_players[position][price_point]:
+            players[position].append(player)
+
 
 #create list of formations
 #formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
@@ -57,6 +92,7 @@ for i in range(1,21):
 
 #loop through each combination of players
 for gk in players['GK']: #for each GK
+    print(gk)
     clubs[gk['club']] += 1
     for a in range(0,len(players['DEF']) - 2):
         clubs[players['DEF'][a]['club']] += 1
@@ -111,9 +147,9 @@ for gk in players['GK']: #for each GK
                                                     results['Starting_XI'] = starting_XI
                                                     results['Points'] = points
                                                     results['Cost'] = cost
-                                                    #pprint(results)
-                                                    #print('Combinations tested: ' + str(combinations_tested))
-                                                    #print(datetime.now())
+                                                    pprint(results)
+                                                    print('Combinations tested: ' + str(combinations_tested))
+                                                    print(datetime.now())
 pprint(results)
 print('Combinations tested: ' + str(combinations_tested))
 
