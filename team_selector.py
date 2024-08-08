@@ -28,6 +28,10 @@ for position in players:
         if player['cost'] not in price_points[position]:
             price_points[position].append(player['cost'])
 
+#sort price points highest to lowest
+for position in price_points:
+    price_points[position].sort(reverse=True)
+
 #get top 5 players for each price piont in each position
 top_players = {}
 
@@ -39,7 +43,7 @@ for position in price_points:
         #for each player in position, add to top players if higher points than players already there, or less than 5 in each position
         for player in players[position]:
             if player['cost'] == price_point:
-                if len(top_players[position][price_point]) < 3:
+                if len(top_players[position][price_point]) < 2:
                     top_players[position][price_point].append(player)
                 #loop through players already in top players and replace if current player pionts are higher
                 else:
@@ -56,6 +60,7 @@ for position in top_players:
         for player in top_players[position][price_point]:
             players[position].append(player)
 
+pprint(players)
 
 #create list of formations
 #formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
@@ -89,50 +94,58 @@ clubs = {}
 for i in range(1,21):
     clubs[i] = 0
 
+#could have if player cost == same postion in startingXI and points <, continue ?
+
 
 #loop through each combination of players
 for gk in players['GK']: #for each GK
-    print(gk)
     clubs[gk['club']] += 1
+    print(gk)
     for a in range(0,len(players['DEF']) - 2):
         clubs[players['DEF'][a]['club']] += 1
         for b in range(a+1,len(players['DEF']) - 1):
             clubs[players['DEF'][b]['club']] += 1
             for c in range(b+1,len(players['DEF'])):
-                clubs[players['DEF'][c]['club']] += 1
-                if clubs[players['DEF'][c]['club']] > 3:
+                if clubs[players['DEF'][c]['club']] == 3:
                     continue
+                else:
+                   clubs[players['DEF'][c]['club']] += 1 
                 for d in range(0,len(players['MID']) - 4):
-                    clubs[players['MID'][d]['club']] += 1
-                    if clubs[players['MID'][d]['club']] > 3: 
+                    if clubs[players['MID'][d]['club']] == 3: 
                         continue
+                    else:
+                        clubs[players['MID'][d]['club']] += 1
                     for e in range(d + 1, len(players['MID']) - 3):
-                        clubs[players['MID'][e]['club']] += 1
-                        if clubs[players['MID'][e]['club']] > 3:
+                        if clubs[players['MID'][e]['club']] == 3:
                             continue
+                        else:
+                            clubs[players['MID'][e]['club']] += 1
                         for f in range(e + 1, len(players['MID']) - 2):
-                            clubs[players['MID'][f]['club']] += 1
-                            if clubs[players['MID'][f]['club']] > 3:
+                            if clubs[players['MID'][f]['club']] == 3:
                                 continue
-                            for g in range(f + 1, len(players['MID']) - 2):
-                                clubs[players['MID'][g]['club']] += 1
-                                if clubs[players['MID'][g]['club']] > 3:
+                            else:
+                                clubs[players['MID'][f]['club']] += 1
+                            for g in range(f + 1, len(players['MID']) - 1):
+                                if clubs[players['MID'][g]['club']] == 3:
                                     continue
+                                else:
+                                    clubs[players['MID'][g]['club']] += 1
                                 for h in range(g + 1, len(players['MID'])):
-                                    clubs[players['MID'][h]['club']] += 1
-                                    if clubs[players['MID'][h]['club']] > 3:
+                                    if clubs[players['MID'][h]['club']] == 3:
                                         continue
+                                    else:
+                                        clubs[players['MID'][h]['club']] += 1
                                     for i in range(0, len(players['FWD']) - 1):
-                                        clubs[players['FWD'][i]['club']] += 1
-                                        if clubs[players['FWD'][i]['club']] > 3: 
+                                        if clubs[players['FWD'][i]['club']] == 3: 
                                             continue
+                                        else:
+                                            clubs[players['FWD'][i]['club']] += 1
                                         for j in range(i + 1, len(players['FWD'])):
-                                            clubs[players['FWD'][j]['club']] += 1
+                                            if clubs[players['FWD'][j]['club']] > 3: 
+                                                continue
+                                            else:
+                                                clubs[players['FWD'][j]['club']] += 1
                                             combinations_tested += 1
-
-                                            #reset club counter
-                                            for i in range(1,21):
-                                                clubs[i] = 0
 
                                             #check if total points of XI higher than default/current toal
                                             points = gk['points'] + players['DEF'][a]['points'] + players['DEF'][b]['points'] + players['DEF'][c]['points'] + players['MID'][d]['points'] + players['MID'][e]['points'] + players['MID'][f]['points'] + players['MID'][g]['points'] + players['MID'][h]['points'] + players['FWD'][i]['points'] + players['FWD'][j]['points']
@@ -147,11 +160,24 @@ for gk in players['GK']: #for each GK
                                                     results['Starting_XI'] = starting_XI
                                                     results['Points'] = points
                                                     results['Cost'] = cost
+                                                    results['Combination'] = combinations_tested
                                                     pprint(results)
                                                     print('Combinations tested: ' + str(combinations_tested))
                                                     print(datetime.now())
+                                            clubs[players['FWD'][j]['club']] -= 1
+                                        clubs[players['FWD'][i]['club']] -= 1
+                                    clubs[players['MID'][h]['club']] -= 1
+                                clubs[players['MID'][g]['club']] -= 1
+                            clubs[players['MID'][f]['club']] -= 1
+                        clubs[players['MID'][e]['club']] -= 1
+                    clubs[players['MID'][d]['club']] -= 1
+                clubs[players['DEF'][c]['club']] -= 1
+            clubs[players['DEF'][b]['club']] -= 1
+        clubs[players['DEF'][a]['club']] -= 1
+    clubs[gk['club']] -= 1
+
 pprint(results)
-print('Combinations tested: ' + str(combinations_tested))
+print('FINAL Combinations tested: ' + str(combinations_tested))
 
 #fill bench - select best players at lowest price piont for each empty position where player per team limit is not exceeded
 #determine bench order - order by average predicted pionts/value or by enforced substitutions?
