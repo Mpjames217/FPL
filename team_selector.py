@@ -1,14 +1,12 @@
-import requests, json
+import requests
 from pprint import pprint
-from datetime import datetime
+import math
 
-#pull player data down from API
-r = requests.get('https://fantasy.premierleague.com/api/bootstrap-static').json()
+r = requests.get('https://fantasy.premierleague.com/api/bootstrap-static/').json()
 players_API = r['elements']
 
-#create and populate dictionary
-#position is 'element_type' with 1 = GK, 2 = DF etc. May actually be much easier to leave like this to loop through!!!
 players = {'GK': [], 'DEF': [], 'MID': [], 'FWD': []}
+positionCosts = {'GK': [], 'DEF': [], 'MID': [], 'FWD': []}
 for player in players_API:
     if player['element_type'] == 1:
         position = 'GK'
@@ -18,170 +16,104 @@ for player in players_API:
         position = 'MID'
     elif player['element_type'] == 4:
         position = 'FWD'
-    players[position].append({'name': player['web_name'], 'club': player['team'], 'cost': player['now_cost'] / 10, 'points': player['total_points']})
 
-#get list of unique price pionts for each position
-price_points = {}
-for position in players:
-    price_points[position] = []
-    for player in players[position]:
-        if player['cost'] not in price_points[position]:
-            price_points[position].append(player['cost'])
+    players[position].append({
+        'name': player['web_name'],
+        'club': player['team'],
+        'cost': player['now_cost'] / 10,
+        'points': player['total_points'],
+        'id': player['id']
+    })
+    positionCosts[position].append(player['now_cost'] / 10)
 
-#sort price points highest to lowest
-for position in price_points:
-    price_points[position].sort(reverse=True)
+formations = [
+	[1, 3, 5, 2],
+	[1, 3, 4, 3],
+	[1, 4, 4, 2],
+	[1, 4, 3, 3],
+	[1, 4, 5, 1],
+	[1, 5, 3, 2],
+	[1, 5, 4, 1],
+	[1, 5, 2, 3],
+]
 
-#get top 5 players for each price piont in each position
-top_players = {}
+for formation in formations:
+	pprint(formation)
+	minBenchCost = min(positionCosts['GK']) + ((5 - formation[1]) * min(positionCosts['DEF'])) + ((5 - formation[2]) *  min(positionCosts['MID'])) + ((3 - formation[3]) *  min(positionCosts['FWD']))
 
-#for each price point
-for position in price_points:
-    top_players[position] = {}
-    for price_point in price_points[position]:
-        top_players[position][price_point] = []
-        #for each player in position, add to top players if higher points than players already there, or less than 5 in each position
-        for player in players[position]:
-            if player['cost'] == price_point:
-                if len(top_players[position][price_point]) < 2:
-                    top_players[position][price_point].append(player)
-                #loop through players already in top players and replace if current player pionts are higher
-                else:
-                    for i in range(len(top_players[position][price_point])):
-                        if player['points'] > top_players[position][price_point][i]['points']:
-                            top_players[position][price_point][i] = player
-                            break
+	budget = 100 - minBenchCost  # Set the total budget to 100 units
 
-#repopulate players[] without the price point keys
-players = {}
-for position in top_players:
-    players[position] = []
-    for price_point in top_players[position]:
-        for player in top_players[position][price_point]:
-            players[position].append(player)
+	# Construct a list of players for each position in the formation
+	positions = [[]]
+	for x in range (formation[0]):
+		positions.append(players['GK'])
+	for x in range (formation[1]):
+	    positions.append(players['DEF'])
+	for x in range (formation[2]):
+	    positions.append(players['MID'])
+	for x in range (formation[3]):
+	    positions.append(players['FWD'])
 
-pprint(players)
+	# DP table to store maximum points for each position and budget
+	dp = [[{'points': -float('inf'), 'used': set(), 'player': None, 'team_count': {}}
+		  for _ in range(int(budget * 10) + 1)] for _ in range(12)]  # Initialize the DP table with negative infinity points
 
-#create list of formations
-#formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
-#scaled down to one formation for intial development
-formations = [[3,5,2]]
+	dp[0][0] = {'points': 0, 'used': set(), 'player': None, 'team_count': {}}  # Base case: no players, zero cost, zero points
 
-#For each formation, calculate minimum budget needed for the bench.
-squad_price = 0
-budget = 100
-min_GK_price = 4.0
-min_DF_price = 4.0
-min_MD_price = 4.5
-min_FD_price = 4.5
+	# Populate the DP table
+	for pos in range(1, 12):  # Loop through each position in the starting XI (1 to 11)
+		for player in positions[pos]:  # Loop through each player eligible for the current position
+			player_cost = int(player["cost"] * 10)
+			player_points = player["points"]
+			player_team = player['club']
 
-bench_GK = 1
-bench_DF = 5 - formations[0][0]
-bench_MD = 5 - formations[0][1]
-bench_FD = 3 - formations[0][2]
+			for b in range(int(budget * 10), player_cost - 1, -1):  # Loop through possible budgets from high to low
+				if dp[pos - 1][b - player_cost]['points'] != -float('inf'):  # Check if the previous state is valid
+					new_points = dp[pos - 1][b - player_cost]['points'] + player_points  # Calculate new total points
+					new_team_count = dp[pos - 1][b - player_cost]['team_count'].copy()  # Copy the team count dictionary
 
-min_bench_budget = bench_GK * min_GK_price + bench_DF * min_DF_price + bench_MD * min_MD_price + bench_FD * min_FD_price
+					# Initialize the team count if this team hasn't been used yet
+					if player_team not in new_team_count:
+						new_team_count[player_team] = 0
+					new_team_count[player_team] += 1  # Increment the count for the player's team
 
-#And budget for starting XI
-starting_XI_budget = budget - min_bench_budget
+					# Ensure no more than 3 players from the same team are selected and update the DP table if better
+					if (new_team_count[player_team] <= 3 and
+						new_points > dp[pos][b]['points'] and
+						player['id'] not in dp[pos - 1][b - player_cost]['used']):
+						dp[pos][b] = {
+							'points': new_points,  # Update the points in the DP table
+							'used': dp[pos - 1][b - player_cost]['used'].union({player['id']}),  # Track used players
+							'player': player['id'],  # Track the current player
+							'team_count': new_team_count  # Update the team count
+						}
 
-#declare variables for using in nested loops below
-results = {'Points': 0, 'Starting_XI': '', 'Cost': starting_XI_budget}
-combinations_tested = 0
+	# Traceback to determine the selected players
+	best_team = []
 
-#initiate club counter dictionary
-clubs = {}
-for i in range(1,21):
-    clubs[i] = 0
+	# Find the budget that gives the maximum points for the last position
+	b = max(range(int(budget * 10) + 1), key=lambda x: dp[11][x]['points'])
+	for pos in range(11, 0, -1):  # Backtrack from the last position to the first
+		if dp[pos][b]['points'] != -float('inf'):  # Ensure the state is valid
+			player_idx = dp[pos][b]['player']  # Get the player index from the DP table
+			if player_idx is not None:
+				for player in positions[pos]:
+					if (player["id"] == player_idx):
+						best_team.append(player)  # Add the player to the best team list
+						b -= int(player["cost"] * 10)  # Subtract the player's cost from the remaining budget
 
-#could have if player cost == same postion in startingXI and points <, continue ?
+	best_team.reverse()
+	max_points = dp[11][max(range(int(budget * 10) + 1), key=lambda x: dp[11][x]['points'])]['points']
 
+	pprint("rating: " + str(max_points))
+	pprint("cost: " + str(max(range(int(budget * 10) + 1), key=lambda x: dp[11][x]['points']) / 10))
+	pprint(best_team)
 
-#loop through each combination of players
-for gk in players['GK']: #for each GK
-    clubs[gk['club']] += 1
-    print(gk)
-    for a in range(0,len(players['DEF']) - 2):
-        clubs[players['DEF'][a]['club']] += 1
-        for b in range(a+1,len(players['DEF']) - 1):
-            clubs[players['DEF'][b]['club']] += 1
-            for c in range(b+1,len(players['DEF'])):
-                if clubs[players['DEF'][c]['club']] == 3:
-                    continue
-                else:
-                   clubs[players['DEF'][c]['club']] += 1 
-                for d in range(0,len(players['MID']) - 4):
-                    if clubs[players['MID'][d]['club']] == 3: 
-                        continue
-                    else:
-                        clubs[players['MID'][d]['club']] += 1
-                    for e in range(d + 1, len(players['MID']) - 3):
-                        if clubs[players['MID'][e]['club']] == 3:
-                            continue
-                        else:
-                            clubs[players['MID'][e]['club']] += 1
-                        for f in range(e + 1, len(players['MID']) - 2):
-                            if clubs[players['MID'][f]['club']] == 3:
-                                continue
-                            else:
-                                clubs[players['MID'][f]['club']] += 1
-                            for g in range(f + 1, len(players['MID']) - 1):
-                                if clubs[players['MID'][g]['club']] == 3:
-                                    continue
-                                else:
-                                    clubs[players['MID'][g]['club']] += 1
-                                for h in range(g + 1, len(players['MID'])):
-                                    if clubs[players['MID'][h]['club']] == 3:
-                                        continue
-                                    else:
-                                        clubs[players['MID'][h]['club']] += 1
-                                    for i in range(0, len(players['FWD']) - 1):
-                                        if clubs[players['FWD'][i]['club']] == 3: 
-                                            continue
-                                        else:
-                                            clubs[players['FWD'][i]['club']] += 1
-                                        for j in range(i + 1, len(players['FWD'])):
-                                            if clubs[players['FWD'][j]['club']] > 3: 
-                                                continue
-                                            else:
-                                                clubs[players['FWD'][j]['club']] += 1
-                                            combinations_tested += 1
+	#This doesn't work well with the multiple formations
+	"""bestBench = {'GK': {'points': 0}, 'DEF': {'points': 0}, 'FWD': {'points': 0}}
+	for pos in bestBench.keys():
+		for player in players[pos]:
+			if min(positionCosts[pos]) == player['cost'] and player['points'] > bestBench[pos]['points']:
+				bestBench[pos] = player
 
-                                            #check if total points of XI higher than default/current toal
-                                            points = gk['points'] + players['DEF'][a]['points'] + players['DEF'][b]['points'] + players['DEF'][c]['points'] + players['MID'][d]['points'] + players['MID'][e]['points'] + players['MID'][f]['points'] + players['MID'][g]['points'] + players['MID'][h]['points'] + players['FWD'][i]['points'] + players['FWD'][j]['points']
-                                            if points >= results['Points']:
-                                                #now check cost - if wanted to return both teams that have equal pionts and price. could have elif: append
-                                                cost = gk['cost'] + players['DEF'][a]['cost'] + players['DEF'][b]['cost'] + players['DEF'][c]['cost'] + players['MID'][d]['cost'] + players['MID'][e]['cost'] + players['MID'][f]['cost'] + players['MID'][g]['cost'] + players['MID'][h]['cost'] + players['FWD'][i]['cost'] + players['FWD'][j]['cost']
-                                                if cost <= starting_XI_budget:
-                                                    #add check here for clubs played for
-
-                                                    #get player names and add all data to results{}
-                                                    starting_XI = [gk['name'], players['DEF'][a]['name'], players['DEF'][b]['name'], players['DEF'][c]['name'], players['MID'][d]['name'], players['MID'][e]['name'], players['MID'][f]['name'], players['MID'][g]['name'], players['MID'][h]['name'], players['FWD'][i]['name'], players['FWD'][j]['name']]
-                                                    results['Starting_XI'] = starting_XI
-                                                    results['Points'] = points
-                                                    results['Cost'] = cost
-                                                    results['Combination'] = combinations_tested
-                                                    pprint(results)
-                                                    print('Combinations tested: ' + str(combinations_tested))
-                                                    print(datetime.now())
-                                            clubs[players['FWD'][j]['club']] -= 1
-                                        clubs[players['FWD'][i]['club']] -= 1
-                                    clubs[players['MID'][h]['club']] -= 1
-                                clubs[players['MID'][g]['club']] -= 1
-                            clubs[players['MID'][f]['club']] -= 1
-                        clubs[players['MID'][e]['club']] -= 1
-                    clubs[players['MID'][d]['club']] -= 1
-                clubs[players['DEF'][c]['club']] -= 1
-            clubs[players['DEF'][b]['club']] -= 1
-        clubs[players['DEF'][a]['club']] -= 1
-    clubs[gk['club']] -= 1
-
-pprint(results)
-print('FINAL Combinations tested: ' + str(combinations_tested))
-
-#fill bench - select best players at lowest price piont for each empty position where player per team limit is not exceeded
-#determine bench order - order by average predicted pionts/value or by enforced substitutions?
-
-#find best player for position one
-
-#repeat for positions 2-3
+	pprint(bestBench)"""
