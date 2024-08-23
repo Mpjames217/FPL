@@ -1,4 +1,4 @@
-import requests, json
+import requests
 from pprint import pprint
 from operator import itemgetter
 #use form as metric for now
@@ -23,6 +23,8 @@ for i in range(1,21):
 for player in all_players:
     for squad_player in team_info['picks']:
         if player['id'] == squad_player['element']:
+            if player['chance_of_playing_next_round'] == 0:
+                player['form'] = 0
             squad_players.append(player)
             clubs[player['team']] += 1
 
@@ -34,7 +36,7 @@ for player in all_players:
     if player['form_rank_type'] < 10 and player not in squad_players and player['chance_of_playing_next_round'] != 0:
         form_players.append(player)
 
-#make a list of possible transfers if there is a positive form delta
+#make a list of possible transfers if form delta exceeds 2
 possible_transfers = []
 
 for form_player in form_players:
@@ -47,4 +49,4 @@ for form_player in form_players:
 #order transfers by point_delta
 possible_transfers = sorted(possible_transfers, key=itemgetter('form_delta'), reverse=True)
 
-pprint(possible_transfers)
+print(possible_transfers[0])
