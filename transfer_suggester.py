@@ -1,52 +1,77 @@
 import requests
 from pprint import pprint
 from operator import itemgetter
-#use form as metric for now
+#make calculate predicted points into function? 
 
-#Pull down info about team - including available transfers
-max_transfers = 5
+#Pull down data from API
+
+r = requests.get('https://fantasy.premierleague.com/api/bootstrap-static').json()
+if type(r) == 'str':
+    print(r)
+    exit()
+all_players = r['elements']
+
+#find current gameweek
+for gw in r['events']:
+    if gw['is_current'] == True:
+        current_GW = str(gw['id'])
+        break
+
 team_id = '8035167'
-current_GW = '1' #fetch this from API
 address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_GW + '/picks'
 team_info = requests.get(address).json()
+transfer_budget = team_info['entry_history']['bank']
 
-#Get full info on players in squad and count players per club
-r = requests.get('https://fantasy.premierleague.com/api/bootstrap-static').json()
-all_players = r['elements']
-squad_players = [] # could compile seperate list of starters and bench players
 
-#initiate club counter dictionary
+#initiate clubs dictionary
+#To minimize number of API calls, will find one player from each club and record the FDR for the club to be cross-referenced with later
 clubs = {}
 for i in range(1,21):
-    clubs[i] = 0
+    clubs[i] = {'count': 0, 'average_FDR': 0}
+    #get club FDR
+    for player in all_players:
+        if player['team'] == i:
+            element_summary = requests.get('https://fantasy.premierleague.com/api/element-summary/' + str(player['id'])).json()
+            clubs[i]['average_FDR'] = (element_summary['fixtures'][0]['difficulty'] + element_summary['fixtures'][1]['difficulty'] + element_summary['fixtures'][2]['difficulty']) / 3
+            break
+
+#get full information on  players in the squad
+squad_players = [] # could compile seperate list of starters and bench players
+form_players = []
 
 for player in all_players:
+    #calculate predicted points
+    average_FDR = clubs[player['team']]['average_FDR']
+    player['predicted_points'] = float(player['form']) / average_FDR
+    if player['chance_of_playing_next_round'] == 0:
+        player['predicted_points'] = 0
+    #append squad players
     for squad_player in team_info['picks']:
         if player['id'] == squad_player['element']:
-            if player['chance_of_playing_next_round'] == 0:
-                player['form'] = 0
             squad_players.append(player)
-            clubs[player['team']] += 1
-
-
-#get top players by form for each position - exluding players already in team and players with injuries
-
-form_players = []
-for player in all_players:
+            clubs[player['team']]['count'] += 1
+    #get top players by form for each position
     if player['form_rank_type'] < 10 and player not in squad_players and player['chance_of_playing_next_round'] != 0:
         form_players.append(player)
 
-#make a list of possible transfers if form delta exceeds 2
+#make a list of possible transfers where predicted point delta exceeds 2
 possible_transfers = []
 
 for form_player in form_players:
     for squad_player in squad_players:
-        if form_player['element_type'] == squad_player['element_type'] and float(form_player['form']) > float(squad_player['form']) + 2 and form_player['now_cost'] <= squad_player['now_cost']:
+        if form_player['element_type'] == squad_player['element_type'] and form_player['predicted_points'] > squad_player['predicted_points'] + 2 and form_player['now_cost'] <= squad_player['now_cost'] + transfer_budget:
             #check max players per club not exceeded
-            if clubs[form_player['team']] < 3 or form_player['team'] == squad_player['team']:
-                possible_transfers.append({'player_in': form_player['web_name'], 'player_out': squad_player['web_name'], 'form_delta': float(form_player['form']) - float(squad_player['form'])})
+            if clubs[form_player['team']]['count'] < 3 or form_player['team'] == squad_player['team']:
+                pp_delta = round(form_player['predicted_points'] - squad_player['predicted_points'], 2)
+                possible_transfers.append({'player_in': form_player['web_name'], 'player_out': squad_player['web_name'], 'pp_delta': pp_delta})
 
 #order transfers by point_delta
-possible_transfers = sorted(possible_transfers, key=itemgetter('form_delta'), reverse=True)
+possible_transfers = sorted(possible_transfers, key=itemgetter('pp_delta'), reverse=True)
 
-print(possible_transfers[0])
+n_transfers = 5
+if len(possible_transfers) < 5:
+    n_transfers = len(possible_transfers)
+
+#print top 5 transfers - could replace with n free transfers
+for i in range(n_transfers):
+    print(possible_transfers[i])
