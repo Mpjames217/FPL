@@ -22,7 +22,7 @@ all_squad_players = []
 for player in all_players:
     for squad_player in team_info['picks']:
         if player['id'] == squad_player['element']:
-            #get FDR of players next match
+            #get Fixture Difficulty Rating (FDR) of players next match
             element_summary = requests.get('https://fantasy.premierleague.com/api/element-summary/' + str(player['id'])).json()
             FDR = element_summary['fixtures'][0]['difficulty']
             modified_FDR = 1 + FDR / 10
@@ -46,26 +46,20 @@ formations = [[1,5,4,1],[1,5,3,2],[1,4,4,2],[1,4,3,3],[1,3,5,2],[1,3,4,3]]
 for position in squad_players:
     squad_players[position] = sorted(squad_players[position], key=itemgetter('predicted_points'), reverse=True)
 
-line_ups = {}
-for formation in formations:
-    line_ups[str(formation)] = {'starting_XI': [], 'total_predicted_points': 0}
-    for i in range(len(formation)): #for each position
-        for j in range(formation[i]): #for each slot in position
-            line_ups[str(formation)]['starting_XI'].append(squad_players[i + 1][j]['web_name'])
-            line_ups[str(formation)]['total_predicted_points'] += squad_players[i + 1][j]['predicted_points']
+#add up the predicted points for the best 11 players in each formation
+line_ups = []
+for formation in range(len(formations)):
+    line_ups.append({'formation': formations[formation], 'starting_XI': [], 'total_predicted_points': 0})
+    for i in range(len(formations[formation])): #for each position
+        for j in range(formations[formation][i]): #for each slot in position
+            line_ups[formation]['starting_XI'].append(squad_players[i + 1][j]['web_name'])
+            line_ups[formation]['total_predicted_points'] += squad_players[i + 1][j]['predicted_points']
 
 
-formation = ''
-starting_XI = []
-total_predicted_points = 0
+line_ups = sorted(line_ups, key=itemgetter('total_predicted_points'), reverse=True)
 
-for line_up in line_ups:
-    if line_ups[line_up]['total_predicted_points'] > total_predicted_points:
-        total_predicted_points = line_ups[line_up]['total_predicted_points']
-        formation = line_up
-        starting_XI = line_ups[line_up]['starting_XI']
-
-print(formation)
-print(starting_XI)
+print(line_ups[0]['formation'])
+print(line_ups[0]['starting_XI'])
+print('Predicted points: ' + str(round(line_ups[0]['total_predicted_points'])))
 print('Captain: ' + captain)
 print('Vice Captain: ' + vice_captain)
