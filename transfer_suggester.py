@@ -1,10 +1,11 @@
 import requests
 from pprint import pprint
 from operator import itemgetter
-#make calculate predicted points into function? 
+
+#make calculate predicted points into function?
+#Next steps: take into acount Double Gameweeks (DGWs), consider more than one transfer, combine with team_selector to factor in increase in first XI points?
 
 #Pull down data from API
-
 r = requests.get('https://fantasy.premierleague.com/api/bootstrap-static').json()
 if type(r) == 'str':
     print(r)
@@ -17,6 +18,7 @@ for gw in r['events']:
         current_GW = str(gw['id'])
         break
 
+#team specific API call
 team_id = '8035167'
 address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_GW + '/picks'
 team_info = requests.get(address).json()
@@ -24,7 +26,7 @@ transfer_budget = team_info['entry_history']['bank']
 
 
 #initiate clubs dictionary
-#To minimize number of API calls, will find one player from each club and record the FDR for the club to be cross-referenced with later
+#To minimize number of API calls, will find one player from each club and record the Ficture Difficulty rating (FDR) for the club to be cross-referenced with later
 clubs = {}
 for i in range(1,21):
     clubs[i] = {'count': 0, 'average_FDR': 0}
@@ -35,7 +37,8 @@ for i in range(1,21):
             clubs[i]['average_FDR'] = (element_summary['fixtures'][0]['difficulty'] + element_summary['fixtures'][1]['difficulty'] + element_summary['fixtures'][2]['difficulty']) / 3
             break
 
-#get full information on  players in the squad
+#get full information on  players in the squad and compile list of form players for each position
+
 squad_players = [] # could compile seperate list of starters and bench players
 form_players = []
 
@@ -50,7 +53,7 @@ for player in all_players:
         if player['id'] == squad_player['element']:
             squad_players.append(player)
             clubs[player['team']]['count'] += 1
-    #get top players by form for each position
+    #append form players
     if player['form_rank_type'] < 10 and player not in squad_players and player['chance_of_playing_next_round'] != 0:
         form_players.append(player)
 
@@ -68,10 +71,10 @@ for form_player in form_players:
 #order transfers by point_delta
 possible_transfers = sorted(possible_transfers, key=itemgetter('pp_delta'), reverse=True)
 
+#print top 5 transfers - could replace with n free transfers
 n_transfers = 5
 if len(possible_transfers) < 5:
     n_transfers = len(possible_transfers)
 
-#print top 5 transfers - could replace with n free transfers
 for i in range(n_transfers):
     print(possible_transfers[i])
