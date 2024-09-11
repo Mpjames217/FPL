@@ -25,7 +25,7 @@ for player in all_players:
             #get Fixture Difficulty Rating (FDR) of players next match
             element_summary = requests.get('https://fantasy.premierleague.com/api/element-summary/' + str(player['id'])).json()
             FDR = element_summary['fixtures'][0]['difficulty']
-            modified_FDR = 1 + FDR / 10
+            modified_FDR = 1 + (FDR - 2)/ 10
             #add extra feilds and append to all_squad_players
             player['predicted_points'] = float(player['form'])  / modified_FDR
             if player['chance_of_playing_next_round'] == 0:
@@ -37,6 +37,7 @@ for player in all_players:
 #select captain and vice captain
 all_squad_players = sorted(all_squad_players, key=itemgetter('predicted_points'), reverse=True)
 captain = all_squad_players[0]['web_name']
+captain_points = all_squad_players[0]['predicted_points']
 vice_captain = all_squad_players[1]['web_name']
 
 #choose formation and starting XI based on predicted points
@@ -49,7 +50,7 @@ for position in squad_players:
 #add up the predicted points for the best 11 players in each formation
 line_ups = []
 for formation in range(len(formations)):
-    line_ups.append({'formation': formations[formation], 'starting_XI': [], 'total_predicted_points': 0})
+    line_ups.append({'formation': formations[formation], 'starting_XI': [], 'total_predicted_points': captain_points})
     for i in range(len(formations[formation])): #for each position
         for j in range(formations[formation][i]): #for each slot in position
             line_ups[formation]['starting_XI'].append(squad_players[i + 1][j]['web_name'])
