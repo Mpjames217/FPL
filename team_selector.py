@@ -25,7 +25,8 @@ for player in all_players:
             #get Fixture Difficulty Rating (FDR) of players next match
             element_summary = requests.get('https://fantasy.premierleague.com/api/element-summary/' + str(player['id'])).json()
             FDR = element_summary['fixtures'][0]['difficulty']
-            modified_FDR = 1 + (FDR - 2)/ 10
+            #FDR is altered to make a more appropriate modifier for form. 2 is deducted from the avg as 2 is the baseline difficulty
+            modified_FDR = 1 + (FDR - 2) / 10
             #add extra feilds and append to all_squad_players
             player['predicted_points'] = float(player['form'])  / modified_FDR
             if player['chance_of_playing_next_round'] == 0:
