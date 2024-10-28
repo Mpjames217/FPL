@@ -84,7 +84,7 @@ if len(possible_transfers) < 5:
 line_ups = []
 
 for i in range(n_transfers):
-    print(possible_transfers[i])
+    # print(possible_transfers[i])
 
     temp_squad_players = deepcopy(squad_players)
 
@@ -94,10 +94,16 @@ for i in range(n_transfers):
             for form_player in form_players:
                 if form_player['web_name'] == possible_transfers[i]['player_in']:
                     temp_squad_players[j] = form_player
-
             
-    line_ups.append(team_selector_function.team_selector(temp_squad_players, clubs))
-    print(line_ups[i])
+    line_up = team_selector_function.team_selector(temp_squad_players, clubs, 'average_FDR')
+    # print(line_up)
+    line_up['squad'] = temp_squad_players
+    line_up['transfer'] = possible_transfers[i]
+    line_ups.append(line_up)
 
 line_ups = sorted(line_ups, key=itemgetter('total_predicted_points'), reverse=True)
-print(line_ups[0])
+current_gw_line_up = team_selector_function.team_selector(line_ups[0]['squad'], clubs, 'next_match_FDR')
+current_gw_line_up['total_predicted_points'] = round(current_gw_line_up['total_predicted_points'])
+
+print(line_ups[0]['transfer'])
+pprint(current_gw_line_up)
