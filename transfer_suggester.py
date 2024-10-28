@@ -1,9 +1,12 @@
 import requests
 from pprint import pprint
 from operator import itemgetter
+from copy import deepcopy
+import team_selector_function
 
 #make calculate predicted points into function?
 #Next steps: take into acount Double Gameweeks (DGWs), consider more than one transfer, combine with team_selector to factor in increase in first XI points?
+#Maybe do one transfer by biggest form gain and only do multiple if improves first XI total points?
 
 #Pull down data from API
 r = requests.get('https://fantasy.premierleague.com/api/bootstrap-static').json()
@@ -24,7 +27,6 @@ address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' +
 team_info = requests.get(address).json()
 transfer_budget = team_info['entry_history']['bank']
 
-
 #initiate clubs dictionary
 #To minimize number of API calls, will find one player from each club and record the Ficture Difficulty rating (FDR) for the club to be cross-referenced with later
 clubs = {}
@@ -35,6 +37,7 @@ for i in range(1,21):
         if player['team'] == i:
             element_summary = requests.get('https://fantasy.premierleague.com/api/element-summary/' + str(player['id'])).json()
             clubs[i]['average_FDR'] = (element_summary['fixtures'][0]['difficulty'] + element_summary['fixtures'][1]['difficulty'] + element_summary['fixtures'][2]['difficulty']) / 3
+            clubs[i]['next_match_FDR'] = element_summary['fixtures'][0]['difficulty']
             break
 
 #get full information on  players in the squad and compile list of form players for each position
@@ -59,6 +62,7 @@ for player in all_players:
 
 #make a list of possible transfers where predicted point delta exceeds 2
 possible_transfers = []
+transfer_elements = []
 
 for form_player in form_players:
     for squad_player in squad_players:
@@ -68,6 +72,7 @@ for form_player in form_players:
                 pp_delta = round(form_player['predicted_points'] - squad_player['predicted_points'], 2)
                 possible_transfers.append({'player_in': form_player['web_name'], 'player_out': squad_player['web_name'], 'pp_delta': pp_delta})
 
+
 #order transfers by point_delta
 possible_transfers = sorted(possible_transfers, key=itemgetter('pp_delta'), reverse=True)
 
@@ -76,5 +81,23 @@ n_transfers = 5
 if len(possible_transfers) < 5:
     n_transfers = len(possible_transfers)
 
+line_ups = []
+
 for i in range(n_transfers):
     print(possible_transfers[i])
+
+    temp_squad_players = deepcopy(squad_players)
+
+    for j in range(len(temp_squad_players)):
+        player = temp_squad_players[j]
+        if player['web_name'] == possible_transfers[i]['player_out']:
+            for form_player in form_players:
+                if form_player['web_name'] == possible_transfers[i]['player_in']:
+                    temp_squad_players[j] = form_player
+
+            
+    line_ups.append(team_selector_function.team_selector(temp_squad_players, clubs))
+    print(line_ups[i])
+
+line_ups = sorted(line_ups, key=itemgetter('total_predicted_points'), reverse=True)
+print(line_ups[0])
