@@ -2,15 +2,13 @@ import requests
 from pprint import pprint
 from operator import itemgetter
 
-##REMOVE API CALL! replace with parameters
-
-def team_selector(squad_players, clubs):  
+def team_selector(squad_players, clubs, FDR_type):  
 
     squad_players_by_position = {1: [], 2: [], 3: [], 4: []}
 
     for player in squad_players:
                 #Modify predicted points based on Fixture Difficulty Rating (FDR) of players next match only
-                FDR = clubs[player['team']]['next_match_FDR']
+                FDR = clubs[player['team']][FDR_type]
                 #FDR is altered to make a more appropriate modifier for form. 2 is deducted from the avg as 2 is the baseline difficulty
                 modified_FDR = 1 + (FDR - 2) / 10
                 #add extra feilds and append to all_squad_players
