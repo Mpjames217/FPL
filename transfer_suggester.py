@@ -48,7 +48,11 @@ form_players = []
 for player in all_players:
     #calculate predicted points
     average_FDR = clubs[player['team']]['average_FDR']
-    player['predicted_points'] = float(player['form']) / average_FDR
+    player['form'] = float(player['form'])
+    if player['form'] > 0:
+        player['predicted_points'] = player['form']/ average_FDR
+    else:
+        player['predicted_points'] = player['form'] * average_FDR
     if player['chance_of_playing_next_round'] != None:
         player['predicted_points'] *= (player['chance_of_playing_next_round']/ 100)
     #append squad players
@@ -56,6 +60,8 @@ for player in all_players:
         if player['id'] == squad_player['element']:
             squad_players.append(player)
             clubs[player['team']]['count'] += 1
+            # print(player['web_name'])
+            # print(player['predicted_points'])
     #append form players
     if player['form_rank_type'] < 10 and player not in squad_players and player['chance_of_playing_next_round'] != 0:
         form_players.append(player)
@@ -77,8 +83,8 @@ for form_player in form_players:
 possible_transfers = sorted(possible_transfers, key=itemgetter('pp_delta'), reverse=True)
 
 #print top 5 transfers - could replace with n free transfers
-n_transfers = 5
-if len(possible_transfers) < 5:
+n_transfers = 20
+if len(possible_transfers) < n_transfers:
     n_transfers = len(possible_transfers)
 
 line_ups = []
