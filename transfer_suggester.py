@@ -49,8 +49,8 @@ for player in all_players:
     #calculate predicted points
     average_FDR = clubs[player['team']]['average_FDR']
     player['predicted_points'] = float(player['form']) / average_FDR
-    if player['chance_of_playing_next_round'] == 0:
-        player['predicted_points'] = 0
+    if player['chance_of_playing_next_round'] != None:
+        player['predicted_points'] *= (player['chance_of_playing_next_round']/ 100)
     #append squad players
     for squad_player in team_info['picks']:
         if player['id'] == squad_player['element']:
@@ -84,7 +84,7 @@ if len(possible_transfers) < 5:
 line_ups = []
 
 for i in range(n_transfers):
-    # print(possible_transfers[i])
+    print(possible_transfers[i])
 
     temp_squad_players = deepcopy(squad_players)
 
