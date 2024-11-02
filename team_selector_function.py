@@ -13,8 +13,8 @@ def team_selector(squad_players, clubs, FDR_type):
                 modified_FDR = 1 + (FDR - 2) / 10
                 #add extra feilds and append to all_squad_players
                 player['predicted_points'] = float(player['form'])  / modified_FDR
-                if player['chance_of_playing_next_round'] == 0:
-                    player['predicted_points'] = 0
+                if player['chance_of_playing_next_round'] != None:
+                    player['predicted_points'] *= (player['chance_of_playing_next_round']/ 100)
                 squad_players_by_position[player['element_type']].append(player)
 
     #choose formation and starting XI based on predicted points
