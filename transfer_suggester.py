@@ -60,8 +60,6 @@ for player in all_players:
         if player['id'] == squad_player['element']:
             squad_players.append(player)
             clubs[player['team']]['count'] += 1
-            # print(player['web_name'])
-            # print(player['predicted_points'])
     #append form players
     if player['form_rank_type'] < 10 and player not in squad_players and player['chance_of_playing_next_round'] != 0:
         form_players.append(player)
@@ -82,7 +80,7 @@ for form_player in form_players:
 #order transfers by point_delta
 possible_transfers = sorted(possible_transfers, key=itemgetter('pp_delta'), reverse=True)
 
-#print top 5 transfers - could replace with n free transfers
+#inspect up to the top 20 transfers
 n_transfers = 20
 if len(possible_transfers) < n_transfers:
     n_transfers = len(possible_transfers)
