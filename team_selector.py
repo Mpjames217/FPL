@@ -4,7 +4,7 @@ from operator import itemgetter
 
 #Pull down info about team
 team_id = '8035167'
-current_GW = '3' #fetch this from API
+current_GW = '13' #fetch this from API
 address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_GW + '/picks'
 team_info = requests.get(address).json()
 
@@ -28,7 +28,10 @@ for player in all_players:
             #FDR is altered to make a more appropriate modifier for form. 2 is deducted from the avg as 2 is the baseline difficulty
             modified_FDR = 1 + (FDR - 2) / 10
             #add extra feilds and append to all_squad_players
-            player['predicted_points'] = float(player['form'])  / modified_FDR
+            if float(player['form']) < 0:
+                player['predicted_points'] = float(player['form']) * modified_FDR
+            else:
+                player['predicted_points'] = float(player['form']) / modified_FDR
             if player['chance_of_playing_next_round'] == 0:
                 player['predicted_points'] = 0
             player['position'] = squad_player['position']
