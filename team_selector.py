@@ -4,7 +4,7 @@ from operator import itemgetter
 
 #Pull down info about team
 team_id = '8035167'
-current_GW = '12' #fetch this from API
+current_GW = '13' #fetch this from API
 address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_GW + '/picks'
 team_info = requests.get(address).json()
 
