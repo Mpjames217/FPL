@@ -48,6 +48,7 @@ for formation in formations:
         min_bench_budget += bench_budgets[position] * bench_positions[position]
     #And budget for starting XI
     starting_XI_budget = budget - min_bench_budget
+    print(starting_XI_budget)
 
     n_combinations = 50
 
@@ -58,7 +59,7 @@ for formation in formations:
     # print(type(top_forwards))
     # pprint(top_forwards)
 
-    results['Starting_XI'] = select_players_utils.get_starting_xi(top_GKs, top_defences, top_midfields, top_forwards, 100)
+    results['Starting_XI'] = select_players_utils.get_starting_xi(top_GKs, top_defences, top_midfields, top_forwards, starting_XI_budget)
 
     
 
