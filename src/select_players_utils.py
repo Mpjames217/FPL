@@ -60,6 +60,35 @@ def get_starting_xi(top_gks, top_defences, top_midfields, top_forwards, budget):
 
     top_player_combinations = sorted(top_player_combinations, key=itemgetter('points'), reverse=True)
     top_player_combinations = top_player_combinations[0:5]
-    # pprint(top_player_combinations)
     
     return top_player_combinations[0]
+
+def get_bench_players(bench_positions, all_player_data):
+    bench_players = {}
+    for position in bench_positions:
+        if bench_positions[position] > 0:
+            bench_players[position] = []
+
+    bench_budgets = {}
+    bench_budgets['GK']  = 4.0
+    bench_budgets['DEF'] = 4.0
+    bench_budgets['MID'] = 4.5
+    bench_budgets['FWD'] = 4.5
+
+    #select best players at lowest price piont for each empty position where player per team limit is not exceeded
+    #determine bench order - order by average predicted pionts/value or by enforced substitutions?
+    for position in bench_players:
+        for slot in range(bench_positions[position]):
+            slot_budget = bench_budgets[position]
+            for player in all_player_data[position]:
+                #check player eligable: under budget, players per club not exceeded, not already in list
+                if player['cost'] <= slot_budget and player not in bench_players[position]:
+                    #if slots for position not full
+                    if len(bench_players[position]) < bench_positions[position] and player not in bench_players[position]:
+                        bench_players[position].append(player)
+                    #otherwise, check for better scoring players
+                    else:
+                        if player['points'] > bench_players[position][slot]['points']:
+                            bench_players[position][slot] = player
+
+    return bench_players

@@ -6,7 +6,9 @@ def get_all_player_data():
         return result['elements']
     
     except:
-        return 'Error encounted accessing API'
+        print('Error encounted accessing API. Execution will terminate')
+        exit()
+    
 
 def transform_all_player_data(all_player_data):
     refactored_data = {'GK': [], 'DEF': [], 'MID': [], 'FWD': []}
@@ -66,3 +68,19 @@ def get_top_players_per_price_point(all_player_data, price_points, players_per_p
                 players[position].append(player)
 
     return players
+
+def get_min_bench_budget(bench_positions):
+
+    bench_budgets = {}
+    # hard coded values to be replaced with a function that finds the cheapest players for a given position
+    bench_budgets['GK']  = 4.0
+    bench_budgets['DEF'] = 4.0
+    bench_budgets['MID'] = 4.5
+    bench_budgets['FWD'] = 4.5
+
+    min_bench_budget = 0
+    for position in bench_budgets:
+        min_bench_budget += bench_budgets[position] * bench_positions[position]
+
+    return min_bench_budget
+

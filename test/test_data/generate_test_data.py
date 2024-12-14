@@ -10,6 +10,6 @@ trimmed.append(result[260])
 trimmed.append(result[320])
 trimmed.append(result[400])
 
-with open('test_data.json', 'w') as f:
+with open('elements.json', 'w') as f:
     json.dump(trimmed, f)
 
