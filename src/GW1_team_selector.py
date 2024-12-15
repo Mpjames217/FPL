@@ -6,15 +6,14 @@ def main():
     all_player_data = utils.get_all_player_data()
     all_player_data = utils.transform_all_player_data(all_player_data)
 
-    #experiemnt without these just using all player data
     price_points = utils.get_unique_price_points(all_player_data)
-    top_players = utils.get_top_players_per_price_point(all_player_data, price_points, 1 )
+    top_players = utils.get_top_players_per_price_point(all_player_data, price_points, 3 )
 
-    #formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
-    formations = [[3,5,2]]
+    formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
+    # formations = [[3,5,2]]
     budget = 100
 
-    results = {'formation': [], 'Starting_XI': {'Points': 0}, 'Bench_players': []}
+    results = {'formation': [], 'Starting_XI': {'points': 0}, 'Bench_players': []}
 
     for formation in formations:
         def_slots = formation[0]
@@ -30,7 +29,7 @@ def main():
         min_bench_budget = utils.get_min_bench_budget(bench_positions)
         starting_XI_budget = budget - min_bench_budget
 
-        n_combinations = 50
+        n_combinations = 20
 
         top_GKs = select_players_utils.get_top_player_combinations(top_players['GK'], 1, n_combinations)
         top_defences = select_players_utils.get_top_player_combinations(top_players['DEF'], def_slots, n_combinations)
@@ -39,7 +38,7 @@ def main():
 
         starting_xi = select_players_utils.get_starting_xi(top_GKs, top_defences, top_midfields, top_forwards, starting_XI_budget)
 
-        if starting_xi['points'] > results['Starting_XI']['Points']:
+        if starting_xi['points'] > results['Starting_XI']['points']:
             results['formation'] = formation
             results['Starting_XI'] = starting_xi
 
