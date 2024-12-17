@@ -105,9 +105,16 @@ for i in range(n_transfers):
     line_up['transfer'] = possible_transfers[i]
     line_ups.append(line_up)
 
-line_ups = sorted(line_ups, key=itemgetter('total_predicted_points'), reverse=True)
-current_gw_line_up = team_selector_function.team_selector(line_ups[0]['squad'], clubs, 'next_match_FDR')
+if line_ups:
+    print(line_ups[0]['transfer'])
+    line_ups = sorted(line_ups, key=itemgetter('total_predicted_points'), reverse=True)
+    current_gw_squad = line_ups[0]['squad']
+    
+else:
+    print('No transfer reccomended')
+    current_gw_squad = squad_players
+
+current_gw_line_up = team_selector_function.team_selector(current_gw_squad, clubs, 'next_match_FDR')
 current_gw_line_up['total_predicted_points'] = round(current_gw_line_up['total_predicted_points'])
 
-print(line_ups[0]['transfer'])
 pprint(current_gw_line_up)
