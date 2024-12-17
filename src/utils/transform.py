@@ -1,15 +1,3 @@
-import requests
-
-def get_all_player_data():
-    try:
-        result = requests.get('https://fantasy.premierleague.com/api/bootstrap-static').json()
-        return result['elements']
-    
-    except:
-        print('Error encounted accessing API. Execution will terminate')
-        exit()
-    
-
 def transform_all_player_data(all_player_data):
     refactored_data = {'GK': [], 'DEF': [], 'MID': [], 'FWD': []}
     for player in all_player_data:
