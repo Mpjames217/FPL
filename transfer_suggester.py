@@ -2,7 +2,7 @@ import requests
 from pprint import pprint
 from operator import itemgetter
 from copy import deepcopy
-import team_selector_function
+import team_selector
 
 #make calculate predicted points into function?
 #Next steps: take into acount Double Gameweeks (DGWs), consider more than one transfer, combine with team_selector to factor in increase in first XI points?
@@ -99,7 +99,7 @@ for i in range(n_transfers):
                 if form_player['web_name'] == possible_transfers[i]['player_in']:
                     temp_squad_players[j] = form_player
             
-    line_up = team_selector_function.team_selector(temp_squad_players, clubs, 'average_FDR')
+    line_up = team_selector.team_selector(temp_squad_players, clubs, 'average_FDR')
     # print(line_up)
     line_up['squad'] = temp_squad_players
     line_up['transfer'] = possible_transfers[i]
@@ -114,7 +114,7 @@ else:
     print('No transfer reccomended')
     current_gw_squad = squad_players
 
-current_gw_line_up = team_selector_function.team_selector(current_gw_squad, clubs, 'next_match_FDR')
+current_gw_line_up = team_selector.team_selector(current_gw_squad, clubs, 'next_match_FDR')
 current_gw_line_up['total_predicted_points'] = round(current_gw_line_up['total_predicted_points'])
 
 pprint(current_gw_line_up)
