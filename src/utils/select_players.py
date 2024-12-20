@@ -92,3 +92,33 @@ def get_bench_players(bench_positions, all_player_data):
                             bench_players[position][slot] = player
 
     return bench_players
+
+def get_top_players_per_price_point(all_player_data, price_points, players_per_price_point):
+    top_players = {}
+
+    #for each price point
+    for position in price_points:
+        top_players[position] = {}
+        for price_point in price_points[position]:
+            top_players[position][price_point] = []
+            #for each player in position, add to top players if higher points than players already there, or less than max in each position
+            for player in all_player_data[position]:
+                if player['cost'] == price_point and player['points'] > 42:
+                    if len(top_players[position][price_point]) < players_per_price_point:
+                        top_players[position][price_point].append(player)
+                    #loop through players already in top players and replace if current player points are higher
+                    else:
+                        for i in range(len(top_players[position][price_point])):
+                            if player['points'] > top_players[position][price_point][i]['points']:
+                                top_players[position][price_point][i] = player
+                                break
+
+    #Populate players{} without the price point keys
+    players = {}
+    for position in top_players:
+        players[position] = []
+        for price_point in top_players[position]:
+            for player in top_players[position][price_point]:
+                players[position].append(player)
+
+    return players

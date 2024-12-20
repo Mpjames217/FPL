@@ -1,5 +1,5 @@
 import pytest, json
-from src.utils import *
+from src.utils.transform import *
 
 class TestTransformAllPlayerData():
     # returns dict

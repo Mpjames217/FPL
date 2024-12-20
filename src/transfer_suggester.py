@@ -1,120 +1,54 @@
-import requests
 from pprint import pprint
-from operator import itemgetter
-from copy import deepcopy
 import team_selector
+import utils.select_players, utils.api, utils.transform
 
 #make calculate predicted points into function?
 #Next steps: take into acount Double Gameweeks (DGWs), consider more than one transfer, combine with team_selector to factor in increase in first XI points?
 #Maybe do one transfer by biggest form gain and only do multiple if improves first XI total points?
 
-#Pull down data from API
-r = requests.get('https://fantasy.premierleague.com/api/bootstrap-static').json()
-if type(r) == 'str':
-    print(r)
-    exit()
-all_players = r['elements']
+response = utils.api.get_data('https://fantasy.premierleague.com/api/bootstrap-static')
 
-#find current gameweek
-for gw in r['events']:
-    if gw['is_current'] == True:
-        current_GW = str(gw['id'])
-        break
+all_players = response['elements']
+current_gw = utils.api.get_current_gw(response)
 
 #team specific API call
 team_id = '8035167'
-address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_GW + '/picks'
-team_info = requests.get(address).json()
+team_info_address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_gw + '/picks'
+team_info = utils.api.get_data(team_info_address)
 transfer_budget = team_info['entry_history']['bank']
 
-#initiate clubs dictionary
-#To minimize number of API calls, will find one player from each club and record the Ficture Difficulty rating (FDR) for the club to be cross-referenced with later
-clubs = {}
-for i in range(1,21):
-    clubs[i] = {'count': 0, 'average_FDR': 0}
-    #get club FDR
-    for player in all_players:
-        if player['team'] == i:
-            element_summary = requests.get('https://fantasy.premierleague.com/api/element-summary/' + str(player['id'])).json()
-            clubs[i]['average_FDR'] = (element_summary['fixtures'][0]['difficulty'] + element_summary['fixtures'][1]['difficulty'] + element_summary['fixtures'][2]['difficulty']) / 3
-            clubs[i]['next_match_FDR'] = element_summary['fixtures'][0]['difficulty']
-            break
+fixture_difficulty_ratings = utils.api.get_FDR_by_club(all_players)
 
-#get full information on  players in the squad and compile list of form players for each position
+#get full information on players in the squad and compile list of form players for each position
 
-squad_players = [] # could compile seperate list of starters and bench players
+squad_players = []
 form_players = []
 
 for player in all_players:
-    #calculate predicted points
-    average_FDR = clubs[player['team']]['average_FDR']
-    player['form'] = float(player['form'])
-    if player['form'] > 0:
-        player['predicted_points'] = player['form']/ average_FDR
-    else:
-        player['predicted_points'] = player['form'] * average_FDR
-    if player['chance_of_playing_next_round'] != None:
-        player['predicted_points'] *= (player['chance_of_playing_next_round']/ 100)
-    #append squad players
+    player = utils.transform.calculate_predicted_points(player, fixture_difficulty_ratings)
+    
     for squad_player in team_info['picks']:
         if player['id'] == squad_player['element']:
             squad_players.append(player)
-            clubs[player['team']]['count'] += 1
-    #append form players
+
     if player['form_rank_type'] < 10 and player not in squad_players and player['chance_of_playing_next_round'] != 0:
         form_players.append(player)
 
 #make a list of possible transfers where predicted point delta exceeds 2
-possible_transfers = []
-transfer_elements = []
+possible_transfers = utils.transform.get_possible_transfers(form_players, squad_players, transfer_budget)
 
-for form_player in form_players:
-    for squad_player in squad_players:
-        if form_player['element_type'] == squad_player['element_type'] and form_player['predicted_points'] > squad_player['predicted_points'] + 2 and form_player['now_cost'] <= squad_player['now_cost'] + transfer_budget:
-            #check max players per club not exceeded
-            if clubs[form_player['team']]['count'] < 3 or form_player['team'] == squad_player['team']:
-                pp_delta = round(form_player['predicted_points'] - squad_player['predicted_points'], 2)
-                possible_transfers.append({'player_in': form_player['web_name'], 'player_out': squad_player['web_name'], 'pp_delta': pp_delta})
-
-
-#order transfers by point_delta
-possible_transfers = sorted(possible_transfers, key=itemgetter('pp_delta'), reverse=True)
-
-#inspect up to the top 20 transfers
-n_transfers = 20
-if len(possible_transfers) < n_transfers:
-    n_transfers = len(possible_transfers)
-
-line_ups = []
-
-for i in range(n_transfers):
-    print(possible_transfers[i])
-
-    temp_squad_players = deepcopy(squad_players)
-
-    for j in range(len(temp_squad_players)):
-        player = temp_squad_players[j]
-        if player['web_name'] == possible_transfers[i]['player_out']:
-            for form_player in form_players:
-                if form_player['web_name'] == possible_transfers[i]['player_in']:
-                    temp_squad_players[j] = form_player
-            
-    line_up = team_selector.team_selector(temp_squad_players, clubs, 'average_FDR')
-    # print(line_up)
-    line_up['squad'] = temp_squad_players
-    line_up['transfer'] = possible_transfers[i]
-    line_ups.append(line_up)
+#inspect up to the top 10 transfers
+line_ups = utils.transform.sort_transfers_by_first_xi_impact(possible_transfers, squad_players, form_players, fixture_difficulty_ratings)
 
 if line_ups:
     print(line_ups[0]['transfer'])
-    line_ups = sorted(line_ups, key=itemgetter('total_predicted_points'), reverse=True)
     current_gw_squad = line_ups[0]['squad']
     
 else:
     print('No transfer reccomended')
     current_gw_squad = squad_players
 
-current_gw_line_up = team_selector.team_selector(current_gw_squad, clubs, 'next_match_FDR')
+current_gw_line_up = team_selector.team_selector(current_gw_squad, fixture_difficulty_ratings, 'next_match_FDR')
 current_gw_line_up['total_predicted_points'] = round(current_gw_line_up['total_predicted_points'])
 
 pprint(current_gw_line_up)

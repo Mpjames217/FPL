@@ -2,11 +2,11 @@ from pprint import pprint
 import utils.select_players, utils.api, utils.transform
 
 def main():
-    all_player_data = utils.api.get_all_player_data()
+    all_player_data = utils.api.get_data('https://fantasy.premierleague.com/api/bootstrap-static')['elements']
     all_player_data = utils.transform.transform_all_player_data(all_player_data)
 
     price_points = utils.transform.get_unique_price_points(all_player_data)
-    top_players = utils.transform.get_top_players_per_price_point(all_player_data, price_points, 3 )
+    top_players = utils.select_players.get_top_players_per_price_point(all_player_data, price_points, 3 )
 
     formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
     budget = 100
