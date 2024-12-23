@@ -122,3 +122,19 @@ def get_top_players_per_price_point(all_player_data, price_points, players_per_p
                 players[position].append(player)
 
     return players
+
+def get_line_up(squad):
+    formations = [[1,5,4,1],[1,5,3,2],[1,4,4,2],[1,4,3,3],[1,3,5,2],[1,3,4,3]]
+    line_ups = []
+
+    for formation in formations:
+        temp_dict = {'formation': formation, 'starting_XI': [], 'total_predicted_points': 0}
+        for i in range(4): #for each position
+            for j in range(formation[i]): #for each slot in position
+                temp_dict['starting_XI'].append(squad[i + 1][j]['web_name'])
+                temp_dict['total_predicted_points'] += squad[i + 1][j]['predicted_points']
+
+        line_ups.append(temp_dict)
+
+    line_ups = sorted(line_ups, key=itemgetter('total_predicted_points'), reverse=True)
+    return line_ups[0]

@@ -19,15 +19,15 @@ def get_current_gw(response):
         
 
 def get_FDR_by_club(all_players):
-    clubs = {}
+    FDR_next_match = {}
+    FDR_average = {}
     for i in range(1,21):
-        clubs[i] = {}
         #get club FDR - upcoming fictures only availble on player specific endpoints so making a call of one player per club
         for player in all_players:
             if player['team'] == i:
                 element_summary = get_data('https://fantasy.premierleague.com/api/element-summary/' + str(player['id']))
-                clubs[i]['average_FDR'] = (element_summary['fixtures'][0]['difficulty'] + element_summary['fixtures'][1]['difficulty'] + element_summary['fixtures'][2]['difficulty']) / 3
-                clubs[i]['next_match_FDR'] = element_summary['fixtures'][0]['difficulty']
+                FDR_average[i] = (element_summary['fixtures'][0]['difficulty'] + element_summary['fixtures'][1]['difficulty'] + element_summary['fixtures'][2]['difficulty']) / 3
+                FDR_next_match[i] = element_summary['fixtures'][0]['difficulty']
                 break
-    return clubs
+    return FDR_next_match, FDR_average
 
