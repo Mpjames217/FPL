@@ -92,8 +92,7 @@ def sort_transfers_by_first_xi_impact(possible_transfers, squad_players, form_pl
                     if form_player['web_name'] == possible_transfers[i]['player_in']:
                         temp_squad_players[j] = form_player
                 
-        line_up = team_selector.team_selector(temp_squad_players, fixture_difficulty_ratings, 'average_FDR')
-        # print(line_up)
+        line_up = team_selector(temp_squad_players, fixture_difficulty_ratings, 'average_FDR')
         line_up['squad'] = temp_squad_players
         line_up['transfer'] = possible_transfers[i]
         line_ups.append(line_up)
