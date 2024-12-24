@@ -1,19 +1,21 @@
 from pprint import pprint
 from operator import itemgetter
-import utils.select_players, utils.api, utils.transform
+import src.utils.select_players as select_players
+import src.utils.api as api
+import src.utils.transform as transform
 
 def team_selector(squad_players, fixture_difficulty_ratings):  
 
     squad_players_by_position = {1: [], 2: [], 3: [], 4: []}
 
     for player in squad_players:
-                player = utils.transform.calculate_predicted_points(player, fixture_difficulty_ratings)
+                player = transform.calculate_predicted_points(player, fixture_difficulty_ratings)
                 squad_players_by_position[player['element_type']].append(player)
 
     for position in squad_players_by_position:
         squad_players_by_position[position] = sorted(squad_players_by_position[position], key=itemgetter('predicted_points'), reverse=True)
    
-    line_up = utils.select_players.get_line_up(squad_players_by_position)
+    line_up = select_players.get_line_up(squad_players_by_position)
     
     #select captain and vice captain
     squad_players = sorted(squad_players, key=itemgetter('predicted_points'), reverse=True)
@@ -28,17 +30,17 @@ def team_selector(squad_players, fixture_difficulty_ratings):
     return line_up
 
 if __name__ == "__main__":
-    response = utils.api.get_data('https://fantasy.premierleague.com/api/bootstrap-static')
+    response = api.get_data('https://fantasy.premierleague.com/api/bootstrap-static')
 
     all_players = response['elements']
-    current_gw = utils.api.get_current_gw(response)
+    current_gw = api.get_current_gw(response)
 
     #team specific API call - gets the players currently in squad and transfer budget
     team_id = '8035167'
     team_info_address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_gw + '/picks'
-    team_info = utils.api.get_data(team_info_address)
+    team_info = api.get_data(team_info_address)
 
-    fixture_difficulty_ratings, _ = utils.api.get_FDR_by_club(all_players)
+    fixture_difficulty_ratings, _ = api.get_FDR_by_club(all_players)
 
     #get full information on players in the squad - team info only contains player IDs
     squad_players = []
