@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from pprint import pprint
 from src.team_selector import team_selector
 from src.utils.sort_by_first_xi import sort_transfers_by_first_xi_impact
@@ -12,7 +14,8 @@ def transfer_suggester():
     current_gw = api.get_current_gw(response)
 
     #team specific API call - gets the players currently in squad and transfer budget
-    team_id = '8035167'
+    load_dotenv()
+    team_id = os.environ.get("team_id")
     team_info_address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_gw + '/picks'
 
     team_info = api.get_data(team_info_address)

@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from pprint import pprint
 from operator import itemgetter
 import src.utils.select_players as select_players
@@ -36,7 +38,8 @@ if __name__ == "__main__":
     current_gw = api.get_current_gw(response)
 
     #team specific API call - gets the players currently in squad and transfer budget
-    team_id = '8035167'
+    load_dotenv()
+    team_id = os.environ.get("team_id")
     team_info_address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_gw + '/picks'
     team_info = api.get_data(team_info_address)
 
