@@ -124,7 +124,7 @@ def get_top_players_per_price_point(all_player_data, price_points, players_per_p
     return players
 
 def get_line_up(squad):
-    formations = [[1,5,4,1],[1,5,3,2],[1,4,4,2],[1,4,3,3],[1,3,5,2],[1,3,4,3]]
+    formations = [[1,5,4,1],[1,5,3,2],[1,4,4,2],[1,4,3,3],[1,3,5,2],[1,3,4,3], [1,4,5,1]]
     line_ups = []
 
     for formation in formations:
