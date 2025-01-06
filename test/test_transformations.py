@@ -78,6 +78,29 @@ class TestTransformAllPlayerData():
                             ],
                             }
 
+class TestGetUniquePricePoints():
+    #returns dict
+    #dict keys are positions from all_player_data
+    #values are lists of floats
+    #values are correct
+    with open('test/test_data/elements.json') as f:
+        data = json.load(f)
+
+    all_player_data = transform_all_player_data(data)
+
+    def test_returns_dict(self):
+        result = get_unique_price_points(self.all_player_data)
+        assert isinstance(result, dict)
+
+    def test_has_correct_keys(self):
+        result = get_unique_price_points(self.all_player_data)
+        expected_keys = ['GK', 'DEF', 'MID', 'FWD']
+        for key in result.keys():
+            assert key in expected_keys
+
+    def test_has_correct_values(self):
+        result = get_unique_price_points(self.all_player_data)
+        assert result == {'DEF': [3.9], 'FWD': [5.0], 'GK': [4.0], 'MID': [13.1, 6.8]}
 
 
                                 
