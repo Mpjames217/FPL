@@ -1,4 +1,5 @@
 import os
+import asyncio
 from dotenv import load_dotenv
 from pprint import pprint
 from operator import itemgetter
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     team_info_address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_gw + '/picks'
     team_info = api.get_data(team_info_address)
 
-    fixture_difficulty_ratings, _ = api.get_FDR_by_club(all_players)
+    fixture_difficulty_ratings, _ = asyncio.run(api.get_FDR_by_club(all_players))
 
     #get full information on players in the squad - team info only contains player IDs
     squad_players = []

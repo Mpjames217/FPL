@@ -1,4 +1,5 @@
 import os
+import asyncio
 from dotenv import load_dotenv
 from pprint import pprint
 from src.team_selector import team_selector
@@ -21,7 +22,7 @@ def transfer_suggester():
     team_info = api.get_data(team_info_address)
     transfer_budget = team_info['entry_history']['bank']
 
-    FDR_next_match, FDR_average = api.get_FDR_by_club(all_players)
+    FDR_next_match, FDR_average = asyncio.run(api.get_FDR_by_club(all_players))
 
     #get full information on players in the squad and compile list of form players for each position - team info only contains player IDs
     squad_players = []
