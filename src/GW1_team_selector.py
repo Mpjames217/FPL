@@ -8,7 +8,7 @@ def main():
     price_points = utils.transform.get_unique_price_points(all_player_data)
     top_players = utils.select_players.get_top_players_per_price_point(all_player_data, price_points, 3 )
 
-    formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3]]
+    formations = [[5,4,1],[5,3,2],[4,4,2],[4,3,3],[3,5,2],[3,4,3],[4,5,1]]
     budget = 100
 
     results = {'formation': [], 'Starting_XI': {'points': 0}, 'Bench_players': []}
