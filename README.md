@@ -42,3 +42,5 @@ Calls the team selector function to ensure the transfer selected has maximum gai
 
 
 **Last Updated:** Sat 18 Jan 2025 12:09:03 PM GMT
+
+ Check out my team here: [Mpjames217_Python](https://fantasy.premierleague.com/entry/8035167/event/22)
