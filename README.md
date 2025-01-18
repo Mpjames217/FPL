@@ -3,9 +3,7 @@ The Python scripts in this repository aim to select the optimal Fantasy Premier 
 
 There are a number of rules restricting squad selection, which can be found on the FPL website: https://fantasy.premierleague.com/help
 
-The team chosen and modified based on these scripts has been entered as Mpjames217_Python
-
-For all scripts, the ID of Fantasy team must be manually entered.
+ **Check out the teams progress here:** [Mpjames217_Python](https://fantasy.premierleague.com/entry/8035167/event/22)
 
 **GW1_team_selector.py**
 
@@ -38,9 +36,3 @@ modified version of the team_selector script with the function modified to be ca
 Will select the best transfer to make based on their form and adjusted for the FDR or their next match.
 
 Calls the team selector function to ensure the transfer selected has maximum gain in total gameweek points for the new strongest XI
-
-
-
-**Last Updated:** Sat 18 Jan 2025 12:09:03 PM GMT
-
- Check out my team here: [Mpjames217_Python](https://fantasy.premierleague.com/entry/8035167/event/22)
