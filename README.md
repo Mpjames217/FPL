@@ -39,3 +39,6 @@ Will select the best transfer to make based on their form and adjusted for the F
 
 Calls the team selector function to ensure the transfer selected has maximum gain in total gameweek points for the new strongest XI
 
+
+
+**Last Updated:** Sat 18 Jan 2025 12:09:03 PM GMT
