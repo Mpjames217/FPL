@@ -15,7 +15,7 @@ def transfer_suggester():
     current_gw = api.get_current_gw(response)
 
     #team specific API call - gets the players currently in squad and transfer budget
-    load_dotenv()
+    load_dotenv(override=True)
     team_id = os.environ.get("team_id")
     team_info_address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_gw + '/picks'
 
