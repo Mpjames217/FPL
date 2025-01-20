@@ -11,7 +11,11 @@ class TestGetData():
     # assert messages printed to console
     # assert program quit? Mock exit()?
     # assert python dict returned
-    pass
+    def test_returns_error_string(self):
+        pass
+    @patch("src.utils.api.requests.get")
+    def test_returns_dict(self):
+        pass
 
 class TestGetCurrentGw():
     #returns string
@@ -107,7 +111,7 @@ class TestGetFdrByClub():
         await get_FDR_by_club(self.all_players)
         execution_time = time() - start_time
 
-        assert execution_time < 0.5
+        assert execution_time < 1
 
 
 

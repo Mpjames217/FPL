@@ -5,3 +5,5 @@ pytest-asyncio
 asyncio
 aiohttp
 aioresponses
+PyGithub
+regex
