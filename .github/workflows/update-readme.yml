@@ -32,8 +32,11 @@ jobs:
     # Step 4: Run the update_readme.py script
     - name: Run script
       env:
+        PYTHONPATH: ${{ github.workspace }}
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
         REPO: ${{ secrets.REPO }}
         team_id: ${{ secrets.TEAM_ID }}
       run: |
+        echo "Current working directory: $(pwd)"
+        echo "PYTHONPATH=$PYTHONPATH"
         python src/update_readme.py
