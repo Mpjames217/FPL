@@ -2,7 +2,7 @@ from github import Github
 from dotenv import load_dotenv
 import os
 import regex as re
-import src.utils.api as api
+import utils.api as api
 
 load_dotenv(override=True)
 
