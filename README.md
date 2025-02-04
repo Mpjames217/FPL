@@ -5,11 +5,11 @@ There are a number of rules restricting squad selection, which can be found on t
 
  **Check out the teams progress here:** [Mpjames217_Python](https://fantasy.premierleague.com/entry/8035167/event/24)
 
- |Total points|Global Ranking|Global Precentile|
+ |Total points|Global Ranking|Global Percentile|
  |------------|--------------|-----------------|
  |1390|3100000|29%|
  
- _*last updated: 2025-02-04 11:28:242025-02-04 11:20:3705/06/2025_
+ _*last updated: 2025-02-04 11:28:24_
 
 ## Scripts
 
