@@ -10,14 +10,6 @@ There are a number of rules restricting squad selection, which can be found on t
  |2000|3000000|28%|
  _*last updated: 05/06/2025_
 
-## Intructions for Use
-
-- Populate the following enviroment variables:
-
-- Populate the following GitHub Secrets:
-
-- S
-
 ## Scripts
 
 **GW1_team_selector.py**
