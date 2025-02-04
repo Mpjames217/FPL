@@ -7,8 +7,8 @@ There are a number of rules restricting squad selection, which can be found on t
 
  |Total points|Global Ranking|Global Precentile|
  |------------|--------------|-----------------|
- |2000|3000000|28%|
- _*last updated: 05/06/2025_
+ |2500|2800000|25%|
+ _*last updated: 2025-02-04 11:20:3705/06/2025_
 
 ## Scripts
 
