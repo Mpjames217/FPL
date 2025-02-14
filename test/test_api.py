@@ -2,7 +2,7 @@ import pytest
 import aiohttp
 from aioresponses import aioresponses
 from unittest.mock import AsyncMock, patch
-from time import time
+import time
 from src.utils.api import *
 
 @pytest.mark.skip
@@ -36,45 +36,67 @@ class TestGetCurrentGw():
         result = get_current_gw(self.response)
         assert result == '2'
 
+
 @pytest.mark.asyncio
 class TestGetFdrByClub():
-    # returns tuple
-    # contains two dicts
-    # dicts have keys 1-20
-    # has correct values - mock/patch get data
+    # returns dict
+    # keys are the next 3 GWs
+    # contains list
+    # lists must only contain numbers 1 - 5
+    # has correct values - mock/patch get data 
+    # one item per list when no dgw***
+    # two items per list when dgw***
+    # no items per list when bgw***
     # total runtime under 0.5 sec
 
     response = get_data('https://fantasy.premierleague.com/api/bootstrap-static')
     all_players = response['elements']
-    
-    @pytest.mark.asyncio
-    async def test_returns_tuple(self):
-        result = await get_FDR_by_club(self.all_players)
-        assert type(result) == tuple
+    current_gw = get_current_gw(response)
+    #have called the funciton here to avoid ansycio complications
+    start_time = time.time()
+    result = asyncio.run(get_FDR_by_club(all_players, current_gw))
+    execution_time = time.time() - start_time
+        
+    def test_returns_dict(self):
+        assert type(self.result) == dict
 
-    @pytest.mark.asyncio
-    async def test_tuple_contains_two_dicts(self):
-        result = await get_FDR_by_club(self.all_players)
-        assert len(result) == 2
+    def test_dict_keys_are_club_ids(self):
+        expected_keys = [i for i in range(1,21)]
+        assert list(self.result.keys()) == expected_keys
 
-        for item in result:
+    def test_dict_values_are_dicts(self):
+        assert len(self.result) == 20
+
+        for item in self.result.values():
             assert isinstance(item, dict)
 
-    @pytest.mark.asyncio
-    async def test_dict_keys_one_to_twenty(self):
-        result = await get_FDR_by_club(self.all_players)
-        expected_keys = [i for i in range(1,21)]
+    def test_inner_dict_keys_are_next_3_gws(self):
+        current_gw = int(self.current_gw)
+        expected_keys = [i for i in range(current_gw, current_gw + 3)]
 
-        for item in result:
+        for item in self.result.values():
             assert list(item.keys()) == expected_keys
+
+    def test_inner_dict_values_are_lists(self):
+        for item in self.result.values():
+            for inner_item in item.values():
+                assert isinstance(inner_item, list)
+
+    def test_list_values_are_valid(self):
+        acceptable_values = [1,2,3,4,5]
+
+        for item in self.result.values():
+            for inner_item in item.values():
+                for value in inner_item:
+                    assert value in acceptable_values
 
     @pytest.mark.asyncio
     async def test_get_element_summaries(self):
 
         mock_element_summary_response = {"fixtures": [
-                                                {"difficulty": 1},
-                                                {"difficulty": 2},
-                                                {"difficulty": 3}
+                                                {"event": 1, "difficulty": 1},
+                                                {"event": 2, "difficulty": 2},
+                                                {"event": 3, "difficulty": 3}
                                             ]
                                         }
         player_id = 1
@@ -84,34 +106,24 @@ class TestGetFdrByClub():
             mock_response.get(url, payload=mock_element_summary_response)
 
             async with aiohttp.ClientSession() as session:
-                FDR_next_match, FDR_average = await get_element_summaries(player_id, session)
+                result = await get_fixtures_by_player(player_id, session, 1)
 
-            assert FDR_next_match == 1
-            assert FDR_average == 2.0
-
+            assert result == {1: [1], 2: [2], 3: [3]}
 
     @pytest.mark.asyncio
-    async def test_get_FDR_by_club(self):
+    async def test_has_correct_values(self):
 
-        with patch("src.utils.api.get_element_summaries", new_callable=AsyncMock) as mock_get_element_summaries:
+        with patch("src.utils.api.get_fixtures_by_player", new_callable=AsyncMock) as mock_get_fixtures_by_player:
             # Mock return values for each player's summaries
-            mock_get_element_summaries.side_effect = [(i, i * 2) for i in range(1, 21)]
+            mock_get_fixtures_by_player.return_value = {1: [1], 2: [2], 3: [3]}
 
-            result = await get_FDR_by_club(self.all_players)
+            result = await get_FDR_by_club(self.all_players, 1)
 
-            FDR_next_match, FDR_average = result
+        for i in range(1, 21):
+            assert result[i] == {1: [1], 2: [2], 3: [3]}
 
-            for i in range(1, 21):
-                assert FDR_next_match[i] == i
-                assert FDR_average[i] == i * 2
-
-    @pytest.mark.asyncio
-    async def test_sends_requests_asynchronously(self):
-        start_time = time()
-        await get_FDR_by_club(self.all_players)
-        execution_time = time() - start_time
-
-        assert execution_time < 1
+    def test_sends_requests_asynchronously(self):
+        assert self.execution_time < 1
 
 
 

@@ -17,16 +17,21 @@ def get_current_gw(response):
         if gw['is_current'] == True:
             return str(gw['id'])
         
-async def get_element_summaries(player_id, session):
+async def get_fixtures_by_player(player_id, session, current_gw):
     url = 'https://fantasy.premierleague.com/api/element-summary/' + str(player_id)
+    next_gw = int(current_gw) + 1
     async with session.get(url) as response:
         element_summary = await response.json()
-        FDR_next_match = element_summary['fixtures'][0]['difficulty']
-        FDR_average = (element_summary['fixtures'][0]['difficulty'] + element_summary['fixtures'][1]['difficulty'] + element_summary['fixtures'][2]['difficulty']) / 3
-        return FDR_next_match , FDR_average
+        fixtures = {}
+        for gw in range(next_gw, next_gw + 3):
+            fixtures[gw] = []
+            for fixture in element_summary['fixtures']:
+                if fixture['event'] == gw:
+                    fixtures[gw].append(fixture['difficulty'])
+        return fixtures
 
 
-async def get_FDR_by_club(all_players):
+async def get_FDR_by_club(all_players, current_gw):
     #get club FDR - upcoming fixtures only availble on player specific endpoints so making a call of one player per club
     player_ids = []
     for i in range(1,21):
@@ -36,13 +41,12 @@ async def get_FDR_by_club(all_players):
                 break
     
     async with aiohttp.ClientSession() as session:
-        tasks = [get_element_summaries(id, session) for id in player_ids]
+        tasks = [get_fixtures_by_player(id, session, current_gw) for id in player_ids]
         response = await asyncio.gather(*tasks)
     
-    FDR_next_match = {}
-    FDR_average = {}
+    fixtures = {}
     for i in range(1,21):
-        FDR_next_match[i] = response[i-1][0]
-        FDR_average[i] = response[i-1][1]
+        fixtures[i] = response[i-1]
 
-    return FDR_next_match, FDR_average
+    pprint.pprint(fixtures)
+    return fixtures

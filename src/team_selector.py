@@ -7,12 +7,11 @@ import src.utils.select_players as select_players
 import src.utils.api as api
 import src.utils.transform as transform
 
-def team_selector(squad_players, fixture_difficulty_ratings):  
+def team_selector(squad_players):  
 
     squad_players_by_position = {1: [], 2: [], 3: [], 4: []}
 
     for player in squad_players:
-                player = transform.calculate_predicted_points(player, fixture_difficulty_ratings)
                 squad_players_by_position[player['element_type']].append(player)
 
     for position in squad_players_by_position:
@@ -44,14 +43,15 @@ if __name__ == "__main__":
     team_info_address = 'https://fantasy.premierleague.com/api/entry/' + team_id + '/event/' + current_gw + '/picks'
     team_info = api.get_data(team_info_address)
 
-    fixture_difficulty_ratings, _ = asyncio.run(api.get_FDR_by_club(all_players))
+    fixture_difficulty_ratings = asyncio.run(api.get_FDR_by_club(all_players, current_gw))
 
     #get full information on players in the squad - team info only contains player IDs
     squad_players = []
     for player in all_players:
         for squad_player in team_info['picks']:
             if player['id'] == squad_player['element']:
+                player = transform.calculate_predicted_points(player, fixture_difficulty_ratings, mode='next_match')
                 squad_players.append(player)
 
-    pprint(team_selector(squad_players, fixture_difficulty_ratings))
+    pprint(team_selector(squad_players))
 

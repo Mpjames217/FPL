@@ -44,17 +44,29 @@ def get_min_bench_budget(bench_positions):
 
     return min_bench_budget
 
-def calculate_predicted_points(player, fixture_difficulty_ratings):
-    FDR = fixture_difficulty_ratings[player['team']]
-    modified_FDR = 1 + ((FDR - 2) /10)
-    player['form'] = float(player['form'])
-    if player['form'] > 0:
-        player['predicted_points'] = player['form']/ modified_FDR
-    else:
-        player['predicted_points'] = player['form'] * modified_FDR
-    if player['chance_of_playing_next_round'] != None:
-        player['predicted_points'] *= (player['chance_of_playing_next_round']/ 100)
+def calculate_predicted_points(player, fixture_difficulty_ratings, mode='average'):
     
+    FDR = fixture_difficulty_ratings[player['team']]
+    predicted_points = 0
+    player['form'] = float(player['form'])
+
+    if mode == 'average':
+        for gw in FDR.values():
+            for fixture in gw:
+                modified_FDR = 1 + ((fixture - 2) /10)
+                predicted_points += player['form'] * modified_FDR
+        predicted_points /= 3
+
+    if mode == 'next_match':
+        gw = list(FDR.values())[0]
+        for fixture in gw:
+            modified_FDR = 1 + ((fixture - 2) /10)
+            predicted_points += player['form'] * modified_FDR
+    
+    if player['chance_of_playing_next_round'] != None:
+        predicted_points *= (player['chance_of_playing_next_round']/ 100)
+
+    player['predicted_points'] = predicted_points
     return player
 
 def get_possible_transfers(form_players, squad_players, transfer_budget):

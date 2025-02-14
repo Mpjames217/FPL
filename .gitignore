@@ -3,3 +3,6 @@ __pycache__/
 .env
 src/initiate_session.py
 src/utils/fdr.py
+src/change_captain.py
+api_response.txt
+dgw_fixtures.txt
