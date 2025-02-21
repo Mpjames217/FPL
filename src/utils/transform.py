@@ -54,14 +54,14 @@ def calculate_predicted_points(player, fixture_difficulty_ratings, mode='average
         for gw in FDR.values():
             for fixture in gw:
                 modified_FDR = 1 + ((fixture - 2) /10)
-                predicted_points += player['form'] * modified_FDR
+                predicted_points += player['form'] / modified_FDR
         predicted_points /= 3
 
     if mode == 'next_match':
         gw = list(FDR.values())[0]
         for fixture in gw:
             modified_FDR = 1 + ((fixture - 2) /10)
-            predicted_points += player['form'] * modified_FDR
+            predicted_points += player['form'] / modified_FDR
     
     if player['chance_of_playing_next_round'] != None:
         predicted_points *= (player['chance_of_playing_next_round']/ 100)
