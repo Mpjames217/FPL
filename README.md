@@ -3,13 +3,13 @@ The Python scripts in this repository aim to select the optimal Fantasy Premier 
 
 There are a number of rules restricting squad selection, which can be found on the FPL website: https://fantasy.premierleague.com/help
 
- **Check out the teams progress here:** [Mpjames217_Python](https://fantasy.premierleague.com/entry/8035167/event/30)
+ **Check out the teams progress here:** [Mpjames217_Python](https://fantasy.premierleague.com/entry/8035167/event/31)
 
  |Total points|Global Ranking|Global Percentile|
  |------------|--------------|-----------------|
- |1745|3893390|34%|
+ |1770|3917387|34%|
  
- _*last updated: 2025-04-04 00:41:57_
+ _*last updated: 2025-04-07 00:44:14_
 
 ## Scripts
 
