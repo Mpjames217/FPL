@@ -27,6 +27,7 @@ def transfer_suggester():
     #get full information on players in the squad and compile list of form players for each position - team info only contains player IDs
     squad_players = []
     form_players = []
+    clubs = {club: 0 for club in range(1,21)}
 
     for player in all_players:
         player = transform.calculate_predicted_points(player, upcoming_FDR)
@@ -34,11 +35,12 @@ def transfer_suggester():
         for squad_player in team_info['picks']:
             if player['id'] == squad_player['element']:
                 squad_players.append(player)
+                clubs[player['team']] += 1
 
         if player['form_rank_type'] < 10 and player not in squad_players and player['chance_of_playing_next_round'] != 0:
             form_players.append(player)
 
-    possible_transfers = transform.get_possible_transfers(form_players, squad_players, transfer_budget)
+    possible_transfers = transform.get_possible_transfers(form_players, squad_players, transfer_budget, clubs)
     
     if not possible_transfers:
         print('No transfer reccomended')

@@ -69,7 +69,7 @@ def calculate_predicted_points(player, fixture_difficulty_ratings, mode='average
     player['predicted_points'] = predicted_points
     return player
 
-def get_possible_transfers(form_players, squad_players, transfer_budget):
+def get_possible_transfers(form_players, squad_players, transfer_budget, clubs):
     '''Returns a list of possible transfers where predicted point delta exceeds 4'''
     possible_transfers = []
 
@@ -77,9 +77,9 @@ def get_possible_transfers(form_players, squad_players, transfer_budget):
         for squad_player in squad_players:
             if form_player['element_type'] == squad_player['element_type'] and form_player['predicted_points'] > squad_player['predicted_points'] + 4 and form_player['now_cost'] <= squad_player['now_cost'] + transfer_budget:
                 #check max players per club not exceeded
-                # if clubs[form_player['team']]['count'] < 3 or form_player['team'] == squad_player['team']:
-                pp_delta = round(form_player['predicted_points'] - squad_player['predicted_points'], 2)
-                possible_transfers.append({'player_in': form_player['web_name'], 'player_out': squad_player['web_name'], 'pp_delta': pp_delta})
+                if clubs[form_player['team']] < 3 or form_player['team'] == squad_player['team']:
+                    pp_delta = round(form_player['predicted_points'] - squad_player['predicted_points'], 2)
+                    possible_transfers.append({'player_in': form_player['web_name'], 'player_out': squad_player['web_name'], 'pp_delta': pp_delta})
 
 
     #order transfers by point_delta
