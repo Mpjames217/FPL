@@ -7,9 +7,9 @@ There are a number of rules restricting squad selection, which can be found on t
 
  |Total points|Global Ranking|Global Percentile|
  |------------|--------------|-----------------|
- |1917|3392829|30%|
+ |1920|3541387|31%|
  
- _*last updated: 2025-04-22 00:43:43_
+ _*last updated: 2025-04-25 00:43:59_
 
 ## Scripts
 
