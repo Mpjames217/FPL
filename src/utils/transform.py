@@ -53,9 +53,9 @@ def calculate_predicted_points(player, fixture_difficulty_ratings, mode='average
     if mode == 'average':
         for gw in FDR.values():
             for fixture in gw:
-                modified_FDR = 1 + ((fixture - 2) /10)
+                modified_FDR = 1 + (fixture /10)
                 predicted_points += player['form'] / modified_FDR
-        predicted_points /= 3
+        predicted_points /= len(FDR)
 
     if mode == 'next_match':
         gw = list(FDR.values())[0]
@@ -75,7 +75,7 @@ def get_possible_transfers(form_players, squad_players, transfer_budget, clubs):
 
     for form_player in form_players:
         for squad_player in squad_players:
-            if form_player['element_type'] == squad_player['element_type'] and form_player['predicted_points'] > squad_player['predicted_points'] + 4 and form_player['now_cost'] <= squad_player['now_cost'] + transfer_budget:
+            if form_player['element_type'] == squad_player['element_type'] and form_player['predicted_points'] > squad_player['predicted_points'] + 2 and form_player['now_cost'] <= squad_player['now_cost'] + transfer_budget:
                 #check max players per club not exceeded
                 if clubs[form_player['team']] < 3 or form_player['team'] == squad_player['team']:
                     pp_delta = round(form_player['predicted_points'] - squad_player['predicted_points'], 2)

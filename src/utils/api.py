@@ -20,10 +20,14 @@ def get_current_gw(response):
 async def get_fixtures_by_player(player_id, session, current_gw):
     url = 'https://fantasy.premierleague.com/api/element-summary/' + str(player_id)
     next_gw = int(current_gw) + 1
+    stop_gw = next_gw + 3
+    if stop_gw > 39:
+        stop_gw = 39
+
     async with session.get(url) as response:
         element_summary = await response.json()
         fixtures = {}
-        for gw in range(next_gw, next_gw + 3):
+        for gw in range(next_gw, stop_gw):
             fixtures[gw] = []
             for fixture in element_summary['fixtures']:
                 if fixture['event'] == gw:
