@@ -9,7 +9,7 @@ There are a number of rules restricting squad selection, which can be found on t
  |------------|--------------|-----------------|
  |2181|3127383|27%|
  
- _*last updated: 2025-06-19 00:47:11_
+ _*last updated: 2025-06-22 00:53:04_
 
 ## Scripts
 
