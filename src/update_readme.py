@@ -44,7 +44,7 @@ def update_readme():
     global_percentile = round(global_ranking / game_info['total_players'] * 100)
     updated_metrics = f"|{total_points}|{global_ranking}|{global_percentile}%|"
 
-    metrics_pattern = r"\|[\d]{1,4}\|[\d]{1,8}\|[\d]{1,3}%\|"
+    metrics_pattern = r"\|2025/2026\|[\d]{1,4}\|[\d]{1,8}\|[\d]{1,3}%\|"
     new_content = re.sub(metrics_pattern, updated_metrics, new_content)
     
     timestamp_pattern = r"[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}"
