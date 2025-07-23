@@ -54,7 +54,7 @@ def get_starting_xi(top_gks, top_defences, top_midfields, top_forwards, budget):
                     temp_dict['points'] = get_total_points(starting_xi)
                     temp_dict['cost'] = get_players_cost(starting_xi)
 
-                    if temp_dict['cost'] < budget and max(temp_dict['club_count'].values()) < 4:
+                    if temp_dict['cost'] <= budget and max(temp_dict['club_count'].values()) < 4:
                         top_player_combinations.append(temp_dict)
 
 
@@ -63,7 +63,7 @@ def get_starting_xi(top_gks, top_defences, top_midfields, top_forwards, budget):
     
     return top_player_combinations[0]
 
-def get_bench_players(bench_positions, all_player_data):
+def get_bench_players(bench_positions, all_player_data, extra_bench_budget):
     bench_players = {}
     for position in bench_positions:
         if bench_positions[position] > 0:
@@ -74,6 +74,14 @@ def get_bench_players(bench_positions, all_player_data):
     bench_budgets['DEF'] = 4.0
     bench_budgets['MID'] = 4.5
     bench_budgets['FWD'] = 4.5
+
+    if extra_bench_budget:
+        if bench_positions['MID'] == 1:
+            bench_budgets['MID'] += extra_bench_budget
+        elif bench_positions['DEF'] == 1:
+            bench_budgets['DEF'] += extra_bench_budget
+        else:
+            bench_budgets['GK'] += extra_bench_budget
 
     #select best players at lowest price piont for each empty position where player per team limit is not exceeded
     #determine bench order - order by average predicted pionts/value or by enforced substitutions?

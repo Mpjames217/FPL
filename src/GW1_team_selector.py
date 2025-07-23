@@ -40,8 +40,8 @@ def main():
             results['formation'] = formation
             results['Starting_XI'] = starting_xi
 
-            bench_budget = budget - starting_xi['cost']
-            results['Bench_players'] = utils.select_players.get_bench_players(bench_positions, all_player_data)
+            extra_bench_budget = starting_XI_budget - starting_xi['cost']
+            results['Bench_players'] = utils.select_players.get_bench_players(bench_positions, all_player_data, extra_bench_budget)
 
     pprint(results)
 
