@@ -54,7 +54,7 @@ def get_starting_xi(top_gks, top_defences, top_midfields, top_forwards, budget):
                     temp_dict['points'] = get_total_points(starting_xi)
                     temp_dict['cost'] = get_players_cost(starting_xi)
 
-                    if temp_dict['cost'] < budget:
+                    if temp_dict['cost'] < budget and max(temp_dict['club_count'].values()) < 4:
                         top_player_combinations.append(temp_dict)
 
 
