@@ -32,6 +32,10 @@ def update_readme():
     current_gw = api.get_current_gw(game_info)
     updated_GW = f"/event/{current_gw}"
 
+    if current_gw == '0':
+        print('Game not started yet. Process terminating.')
+        quit() 
+
     hyperlink_pattern = r"/event/[\d]{1,2}"
     new_content = re.sub(hyperlink_pattern, updated_GW, current_content)
 
