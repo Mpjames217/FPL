@@ -1,4 +1,5 @@
 from operator import itemgetter
+from datetime import datetime
 
 def transform_all_player_data(all_player_data):
     refactored_data = {'GK': [], 'DEF': [], 'MID': [], 'FWD': []}
@@ -49,10 +50,13 @@ def calculate_predicted_points(player, fixture_difficulty_ratings, mode='average
     FDR = fixture_difficulty_ratings[player['team']]
     predicted_points = 0
     player['form'] = float(player['form'])
+    suspension_end_gw = player.get('suspension_end_gw', 0)
 
     if mode == 'average':
-        for gw in FDR.values():
-            for fixture in gw:
+        for gw, fixtures in FDR.items():
+            if gw < suspension_end_gw:
+                continue
+            for fixture in fixtures:
                 modified_FDR = 1 + (fixture /10)
                 predicted_points += player['form'] / modified_FDR
         predicted_points /= len(FDR)
@@ -62,7 +66,7 @@ def calculate_predicted_points(player, fixture_difficulty_ratings, mode='average
         for fixture in gw:
             modified_FDR = 1 + ((fixture - 2) /10)
             predicted_points += player['form'] / modified_FDR
-    
+            
     if player['chance_of_playing_next_round'] != None:
         predicted_points *= (player['chance_of_playing_next_round']/ 100)
 
@@ -76,11 +80,19 @@ def get_possible_transfers(form_players, squad_players, transfer_budget, clubs):
     for form_player in form_players:
         for squad_player in squad_players:
             if form_player['element_type'] == squad_player['element_type'] and form_player['predicted_points'] > squad_player['predicted_points'] + 2 and form_player['now_cost'] <= squad_player['now_cost'] + transfer_budget:
-                #check max players per club not exceeded
+                # check max players per club not exceeded
                 if clubs[form_player['team']] < 3 or form_player['team'] == squad_player['team']:
                     pp_delta = round(form_player['predicted_points'] - squad_player['predicted_points'], 2)
                     possible_transfers.append({'player_in': form_player['web_name'], 'player_out': squad_player['web_name'], 'pp_delta': pp_delta})
 
 
-    #order transfers by point_delta
+    # order transfers by point_delta
     return sorted(possible_transfers, key=itemgetter('pp_delta'), reverse=True)
+
+def player_suspension_check(player):
+    if player['news'].startswith('Suspended until '):
+        return_date = player['news'][16:]
+        current_year = datetime.now().year
+        return_datetime = datetime.strptime(f'{return_date} {current_year}', '%d %b %Y')
+        return return_datetime.strftime('%Y-%m-%d')
+    return None

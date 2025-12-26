@@ -111,7 +111,7 @@ def get_top_players_per_price_point(all_player_data, price_points, players_per_p
             top_players[position][price_point] = []
             #for each player in position, add to top players if higher points than players already there, or less than max in each position
             for player in all_player_data[position]:
-                if player['cost'] == price_point and player['points'] > 42:
+                if player['cost'] == price_point and player['points'] > 1:
                     if len(top_players[position][price_point]) < players_per_price_point:
                         top_players[position][price_point].append(player)
                     #loop through players already in top players and replace if current player points are higher

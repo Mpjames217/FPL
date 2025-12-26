@@ -18,6 +18,12 @@ def get_current_gw(response):
             return str(gw['id'])
     # game not started yet for new season
     return '0'
+
+def get_suspended_player_return_gw(player_id, return_date):
+    response = get_data('https://fantasy.premierleague.com/api/element-summary/' + str(player_id))
+    for gw in response['fixtures']:
+        if gw['kickoff_time'].startswith(return_date):
+            return gw['event_name'].replace('Gameweek ', '')
         
 async def get_fixtures_by_player(player_id, session, current_gw):
     url = 'https://fantasy.premierleague.com/api/element-summary/' + str(player_id)

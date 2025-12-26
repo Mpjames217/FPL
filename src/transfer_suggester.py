@@ -30,6 +30,13 @@ def transfer_suggester():
     clubs = {club: 0 for club in range(1,21)}
 
     for player in all_players:
+        suspension_check = transform.player_suspension_check(player)
+
+        if suspension_check:
+            suspension_end_gw = api.get_suspended_player_return_gw(player['id'], suspension_check)
+            player['suspension_end_gw'] = int(suspension_end_gw) if suspension_end_gw is not None else 0 # Move Into Function!
+            print(f'Suspended player {player["web_name"]} will return for GW{suspension_end_gw}') # Move Into Function!
+
         player = transform.calculate_predicted_points(player, upcoming_FDR)
         
         for squad_player in team_info['picks']:
@@ -46,7 +53,8 @@ def transfer_suggester():
         print('No transfer reccomended')
         current_gw_squad = squad_players
     else:
-        line_ups = sort_transfers_by_first_xi_impact(possible_transfers, squad_players, form_players)
+        if len(possible_transfers) > 1:
+            line_ups = sort_transfers_by_first_xi_impact(possible_transfers, squad_players, form_players)
         print(line_ups[0]['transfer'])
         current_gw_squad = line_ups[0]['squad']
 
