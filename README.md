@@ -8,9 +8,9 @@ There are a number of rules restricting squad selection, which can be found on t
  |Season|Total points|Global Ranking|Global Percentile|
  |------|------------|--------------|-----------------|
  |2024/2025|2181|3127383|27%|
- |2025/2026|1116|4766827|37%|
+ |2025/2026|1127|4502175|35%|
  
- _*last updated: 2026-01-19 00:55:17_
+ _*last updated: 2026-01-22 00:51:18_
 
 ## Scripts
 
