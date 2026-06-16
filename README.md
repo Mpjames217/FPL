@@ -10,7 +10,7 @@ There are a number of rules restricting squad selection, which can be found on t
  |2024/2025|2181|3127383|27%|
  |2025/2026|1984|4346530|33%|
  
- _*last updated: 2026-06-13 02:03:52_
+ _*last updated: 2026-06-16 02:33:17_
 
 ## Scripts
 
